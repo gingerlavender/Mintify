@@ -1,5 +1,3 @@
-import React, { MouseEventHandler } from "react";
-
 export type TaskType = "walletConnect" | "spotifyConnect" | "mintNFT";
 
 export interface TaskProps {
