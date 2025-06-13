@@ -1,10 +1,41 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
+const inter = localFont({
+  src: [
+    {
+      path: "../../public/fonts/Inter-Thin.woff2",
+      weight: "100",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Inter-ExtraLight.woff2",
+      weight: "200",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Inter-Light.woff2",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Inter-LightItalic.woff2",
+      weight: "300",
+      style: "italic",
+    },
+    {
+      path: "../../public/fonts/Inter-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Inter-Medium.woff2",
+      weight: "500",
+      style: "normal",
+    },
+  ],
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -23,7 +54,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head></head>
-      <body className={`antialiased ${inter.className}`}>{children}</body>
+      <body className={`antialiased ${inter.variable}`}>{children}</body>
     </html>
   );
 }
