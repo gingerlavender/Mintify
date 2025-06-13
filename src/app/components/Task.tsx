@@ -1,5 +1,3 @@
-import WalletConnectButton from "./buttons/WalletConnectButton";
-
 import { TaskProps } from "../types/task.types";
 import { useTaskType } from "../hooks/useTaskType";
 
