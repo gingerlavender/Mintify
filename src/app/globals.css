@@ -1,8 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #000000;
 }
 
 @theme inline {
@@ -12,15 +11,14 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
-  color: var(--foreground);
+  color: #fff;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer components {
+  .task-button {
+    @apply text-base font-[400] min-w-[50%] md:min-w-[18%] bg-white text-[#2d3436] rounded-3xl p-3 mt-4 md:mt-0 hover:opacity-80 active:translate-y-0.5 transition-all duration-200 shadow-md shadow-[#2d3436] cursor-pointer;
+  }
 }
