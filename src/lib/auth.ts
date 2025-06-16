@@ -4,6 +4,9 @@ import SpotifyProvider from "next-auth/providers/spotify";
 import { prisma } from "./prisma";
 
 export const authOptions: AuthOptions = {
+  pages: {
+    signIn: "/auth/signin",
+  },
   adapter: PrismaAdapter(prisma),
   providers: [
     SpotifyProvider({
