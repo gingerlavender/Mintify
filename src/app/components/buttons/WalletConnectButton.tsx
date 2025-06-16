@@ -2,15 +2,7 @@
 
 import { ButtonProps } from "@/app/types/button.types";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-
-const isMobile = () =>
-  typeof window !== "undefined" &&
-  /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-const metamaskDeepLink = () => {
-  const hostname = window?.location?.hostname ?? "";
-  return `https://metamask.app.link/dapp/${hostname}`;
-};
+import { isMobile, isMetaMaskBrowser, metamaskDeepLink } from "@/lib/mobile";
 
 const WalletConnectButton: React.FC<ButtonProps> = ({ text }) => {
   return (
@@ -33,7 +25,7 @@ const WalletConnectButton: React.FC<ButtonProps> = ({ text }) => {
 
         const handleConnectClick = () => {
           if (!connected) {
-            if (isMobile()) {
+            if (isMobile() && !isMetaMaskBrowser()) {
               window.location.href = metamaskDeepLink();
             } else {
               openConnectModal?.();
