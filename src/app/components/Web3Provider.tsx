@@ -18,7 +18,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       appName: "Mintify",
       projectId: `${process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID}`,
       chains: [mainnet, optimism],
-      ssr: true,
+      ssr: false,
     });
 
     setConfig(cfg);
