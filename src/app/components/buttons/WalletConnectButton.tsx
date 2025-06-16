@@ -1,20 +1,79 @@
 "use client";
 
 import { ButtonProps } from "@/app/types/button.types";
-
-import { ConnectKitButton } from "connectkit";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const WalletConnectButton: React.FC<ButtonProps> = ({ text }) => {
   return (
-    <ConnectKitButton.Custom>
-      {({ isConnected, show, truncatedAddress, ensName }) => {
+    <ConnectButton.Custom>
+      {({
+        account,
+        chain,
+        openConnectModal,
+        openAccountModal,
+        openChainModal,
+        mounted,
+        authenticationStatus,
+      }) => {
+        const ready = mounted && authenticationStatus !== "loading";
+        const connected =
+          ready &&
+          account &&
+          chain &&
+          (!authenticationStatus || authenticationStatus === "authenticated");
+
         return (
-          <button className="task-button" onClick={show}>
-            {isConnected ? ensName ?? truncatedAddress : text}
-          </button>
+          <div className="flex justify-center min-w-[50%] md:min-w-[18%]">
+            <button
+              type="button"
+              className={`task-button flex justify-around ${
+                connected ? "min-w-fit" : "w-full"
+              }`}
+              onClick={connected ? openAccountModal : openConnectModal}
+              disabled={!ready}
+            >
+              {!connected ? (
+                `${text}`
+              ) : (
+                <>
+                  {account.ensAvatar && (
+                    <img
+                      src={account.ensAvatar}
+                      alt="ENS Avatar"
+                      className="w-6 h-6 rounded-full mr-1.5"
+                    />
+                  )}
+                  {account.ensName ??
+                    `${account.address.slice(0, 6)}...${account.address.slice(
+                      -4
+                    )}`}
+                </>
+              )}
+            </button>
+
+            {connected && (
+              <>
+                {chain.unsupported ? (
+                  <button
+                    className="task-button min-w-fit ml-2 bg-red-500 text-white"
+                    onClick={openChainModal}
+                  >
+                    Unsupported Network
+                  </button>
+                ) : (
+                  <button
+                    className="task-button min-w-fit ml-2"
+                    onClick={openChainModal}
+                  >
+                    {chain.name}
+                  </button>
+                )}
+              </>
+            )}
+          </div>
         );
       }}
-    </ConnectKitButton.Custom>
+    </ConnectButton.Custom>
   );
 };
 
