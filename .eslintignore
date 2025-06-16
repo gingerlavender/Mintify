@@ -1,5 +1,0 @@
-src/generated/
-prisma/generated/
-**/generated/
-node_modules/
-.next/
