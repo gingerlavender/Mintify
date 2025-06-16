@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState<boolean>(false);
   const [config, setConfig] = useState<Config>();
-  const [queryClient, setQueryClient] = useState<QueryClient>();
+  const [queryClient] = useState(() => new QueryClient());
 
   useEffect(() => {
     const cfg = getDefaultConfig({
@@ -22,7 +22,6 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     });
 
     setConfig(cfg);
-    setQueryClient(new QueryClient());
     setMounted(true);
   }, []);
 
