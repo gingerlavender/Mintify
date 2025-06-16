@@ -17,7 +17,7 @@ export const useTaskType = (taskType: TaskType) => {
       text: "Connect Your Spotify Account",
       ButtonElement: (
         <BaseButton
-          text={session ? "Connected" : "Connect"}
+          text={session ? session.user.name ?? "idk" : "Connect"}
           onClick={session ? () => signOut() : () => signIn()}
         />
       ),
