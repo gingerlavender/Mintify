@@ -5,7 +5,7 @@ import { prisma } from "./prisma";
 
 export const authOptions: AuthOptions = {
   pages: {
-    signIn: "/auth/signin",
+    signIn: "/auth/login",
   },
   adapter: PrismaAdapter(prisma),
   providers: [
