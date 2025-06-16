@@ -9,5 +9,5 @@ export async function GET() {
     redirect("/");
   }
 
-  redirect("/api/auth/signin/spotify");
+  redirect("/api/auth/signin/spotify?callbackUrl=/");
 }
