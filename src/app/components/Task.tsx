@@ -1,3 +1,5 @@
+"use client";
+
 import { TaskProps } from "../types/task.types";
 import { useTaskType } from "../hooks/useTaskType";
 

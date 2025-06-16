@@ -1,8 +1,13 @@
+"use client";
+
 import { taskConfig, TaskType } from "@/app/types/task.types";
 import WalletConnectButton from "../components/buttons/WalletConnectButton";
 import BaseButton from "../components/buttons/BaseButton";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 export const useTaskType = (taskType: TaskType) => {
+  const { data: session } = useSession();
+
   const taskConfigs: Record<TaskType, taskConfig> = {
     walletConnect: {
       text: "Connect Your Wallet",
@@ -10,7 +15,12 @@ export const useTaskType = (taskType: TaskType) => {
     },
     spotifyConnect: {
       text: "Connect Your Spotify Account",
-      ButtonElement: <BaseButton text="Connect" />,
+      ButtonElement: (
+        <BaseButton
+          text={session ? "Connected" : "Connect"}
+          onClick={session ? () => signOut() : () => signIn()}
+        />
+      ),
     },
     mintNFT: {
       text: "Turn Your Music Taste Into NFT!",
