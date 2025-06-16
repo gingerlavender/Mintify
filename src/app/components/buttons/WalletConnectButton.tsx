@@ -3,6 +3,15 @@
 import { ButtonProps } from "@/app/types/button.types";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
+const isMobile = () =>
+  typeof window !== "undefined" &&
+  /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+const metamaskDeepLink = () => {
+  const hostname = window?.location?.hostname ?? "";
+  return `https://metamask.app.link/dapp/${hostname}`;
+};
+
 const WalletConnectButton: React.FC<ButtonProps> = ({ text }) => {
   return (
     <ConnectButton.Custom>
@@ -22,6 +31,18 @@ const WalletConnectButton: React.FC<ButtonProps> = ({ text }) => {
           chain &&
           (!authenticationStatus || authenticationStatus === "authenticated");
 
+        const handleConnectClick = () => {
+          if (!connected) {
+            if (isMobile()) {
+              window.location.href = metamaskDeepLink();
+            } else {
+              openConnectModal?.();
+            }
+          } else {
+            openAccountModal?.();
+          }
+        };
+
         return (
           <div className="flex justify-center min-w-[50%] md:min-w-[18%]">
             <button
@@ -29,7 +50,7 @@ const WalletConnectButton: React.FC<ButtonProps> = ({ text }) => {
               className={`task-button flex justify-around ${
                 connected ? "min-w-fit" : "w-full"
               }`}
-              onClick={connected ? openAccountModal : openConnectModal}
+              onClick={handleConnectClick}
               disabled={!ready}
             >
               {!connected ? (
