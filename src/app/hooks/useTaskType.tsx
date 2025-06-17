@@ -18,7 +18,7 @@ export const useTaskType = (taskType: TaskType) => {
       text: "Connect Your Spotify Account",
       ButtonElement: (
         <ButtonWithAvatar
-          text={"Connect"}
+          text="Connect"
           onClick={
             session
               ? () => signOut()

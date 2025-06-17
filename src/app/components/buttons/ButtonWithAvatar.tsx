@@ -12,8 +12,8 @@ const ButtonWithAvatar: React.FC<ButtonWithAvatarProps> = ({
   return (
     <button
       type="button"
-      className={`task-button flex justify-around ${
-        connected ? "min-w-fit" : "w-full"
+      className={`task-button flex flex-wrap justify-around ${
+        connected == undefined ? "w-full" : ""
       }`}
       onClick={onClick}
       disabled={disabled}

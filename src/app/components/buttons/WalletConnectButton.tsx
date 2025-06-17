@@ -37,7 +37,7 @@ const WalletConnectButton: React.FC<ButtonProps> = ({ text }) => {
         };
 
         return (
-          <div className="flex justify-center min-w-[50%] md:min-w-[18%]">
+          <div className="flex flex-wrap justify-center min-w-[50%] md:min-w-[18%]">
             <ButtonWithAvatar
               onClick={handleConnectClick}
               text={text}
@@ -49,7 +49,7 @@ const WalletConnectButton: React.FC<ButtonProps> = ({ text }) => {
               }
               avatar={account?.ensAvatar}
               disabled={!ready}
-              connected={!!connected}
+              connected={connected}
             />
 
             {connected && (
