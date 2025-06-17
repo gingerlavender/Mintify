@@ -9,7 +9,6 @@ import { mainnet, optimism } from "wagmi/chains";
 import { useEffect, useState } from "react";
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState<boolean>(false);
   const [config, setConfig] = useState<Config>();
   const [queryClient] = useState(() => new QueryClient());
 
@@ -18,16 +17,15 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       appName: "Mintify",
       projectId: `${process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID}`,
       chains: [mainnet, optimism],
-      ssr: false,
+      ssr: true,
     });
 
     setConfig(cfg);
-    setMounted(true);
   }, []);
 
   return (
     <>
-      {mounted && config && queryClient && (
+      {config && (
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
             <RainbowKitProvider>{children}</RainbowKitProvider>
