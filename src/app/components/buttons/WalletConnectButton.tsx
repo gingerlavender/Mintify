@@ -49,7 +49,7 @@ const WalletConnectButton: React.FC<ButtonProps> = ({ text }) => {
               }
               avatar={account?.ensAvatar}
               disabled={!ready}
-              connected={connected}
+              connected={!!connected}
             />
 
             {connected && (
