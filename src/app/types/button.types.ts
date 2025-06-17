@@ -6,8 +6,8 @@ export interface ButtonProps {
 }
 
 export interface ButtonWithAvatarProps extends ButtonProps {
-  textOnConnected: string;
-  connected?: boolean;
-  avatar?: string;
+  textOnConnected: string | null | undefined;
+  avatar: string | null | undefined;
+  connected: boolean;
   disabled?: boolean;
 }
