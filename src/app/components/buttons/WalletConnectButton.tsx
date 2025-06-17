@@ -3,6 +3,7 @@
 import { ButtonProps } from "@/app/types/button.types";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { isMobile, isMetaMaskBrowser, metamaskDeepLink } from "@/lib/mobile";
+import ButtonWithAvatar from "./ButtonWithAvatar";
 
 const WalletConnectButton: React.FC<ButtonProps> = ({ text }) => {
   return (
@@ -37,32 +38,19 @@ const WalletConnectButton: React.FC<ButtonProps> = ({ text }) => {
 
         return (
           <div className="flex justify-center min-w-[50%] md:min-w-[18%]">
-            <button
-              type="button"
-              className={`task-button flex justify-around ${
-                connected ? "min-w-fit" : "w-full"
-              }`}
+            <ButtonWithAvatar
               onClick={handleConnectClick}
+              text={text}
+              textOnConnected={
+                account?.ensName ??
+                `${account?.address.slice(0, 6)}...${account?.address.slice(
+                  -4
+                )}`
+              }
+              avatar={account?.ensAvatar}
               disabled={!ready}
-            >
-              {!connected ? (
-                `${text}`
-              ) : (
-                <>
-                  {account.ensAvatar && (
-                    <img
-                      src={account.ensAvatar}
-                      alt="ENS Avatar"
-                      className="w-6 h-6 rounded-full mr-1.5"
-                    />
-                  )}
-                  {account.ensName ??
-                    `${account.address.slice(0, 6)}...${account.address.slice(
-                      -4
-                    )}`}
-                </>
-              )}
-            </button>
+              connected={connected}
+            />
 
             {connected && (
               <>
