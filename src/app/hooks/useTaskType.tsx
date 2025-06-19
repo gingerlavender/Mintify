@@ -26,10 +26,10 @@ export const useTaskType = (taskType: TaskType) => {
               ? () => signOut()
               : () => signIn("spotify", { callbackUrl: "/" })
           }
-          connected={session != null}
+          connected={!session}
           textOnConnected={session?.user.name}
           avatar={session?.user.image}
-          disabled={!isConnected}
+          disabled={!session && !isConnected}
         />
       ),
     },
