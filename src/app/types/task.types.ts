@@ -4,7 +4,7 @@ export interface TaskProps {
   taskType: TaskType;
 }
 
-export interface taskConfig {
+export interface TaskConfig {
   text: string;
   ButtonElement: JSX.Element;
 }

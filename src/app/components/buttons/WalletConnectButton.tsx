@@ -1,11 +1,10 @@
 "use client";
 
-import { ButtonProps } from "@/app/types/button.types";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { isMobile, isMetaMaskBrowser, metamaskDeepLink } from "@/lib/mobile";
 import ButtonWithAvatar from "./ButtonWithAvatar";
 
-const WalletConnectButton: React.FC<ButtonProps> = ({ text }) => {
+const WalletConnectButton = () => {
   return (
     <ConnectButton.Custom>
       {({
@@ -40,7 +39,7 @@ const WalletConnectButton: React.FC<ButtonProps> = ({ text }) => {
           <div className="flex flex-wrap justify-center min-w-[50%] md:min-w-[18%]">
             <ButtonWithAvatar
               onClick={handleConnectClick}
-              text={text}
+              text="Connect"
               textOnConnected={
                 account?.ensName ??
                 `${account?.address.slice(0, 6)}...${account?.address.slice(
