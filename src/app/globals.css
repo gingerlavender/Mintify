@@ -19,6 +19,6 @@ body {
 
 @layer components {
   .task-button {
-    @apply text-base font-[400] min-w-[50%] md:min-w-[18%] bg-white text-[#2d3436] rounded-3xl p-3 mt-4 md:mt-0 hover:opacity-80 active:translate-y-0.5 transition-all duration-200 shadow-md shadow-[#2d3436] cursor-pointer;
+    @apply text-base font-[400] min-w-[50%] md:min-w-[18%] bg-white text-[#2d3436] rounded-3xl p-3 mt-4 md:mt-0 hover:opacity-80 active:translate-y-0.5 transition-all duration-200 shadow-md shadow-[#2d3436] cursor-pointer disabled:opacity-40;
   }
 }

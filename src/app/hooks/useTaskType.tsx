@@ -5,9 +5,11 @@ import WalletConnectButton from "../components/buttons/WalletConnectButton";
 import BaseButton from "../components/buttons/BaseButton";
 import { signIn, signOut, useSession } from "next-auth/react";
 import ButtonWithAvatar from "../components/buttons/ButtonWithAvatar";
+import { useAccount } from "wagmi";
 
 export const useTaskType = (taskType: TaskType) => {
   const { data: session } = useSession();
+  const { isConnected } = useAccount();
 
   const taskConfigs: Record<TaskType, taskConfig> = {
     walletConnect: {
@@ -24,15 +26,18 @@ export const useTaskType = (taskType: TaskType) => {
               ? () => signOut()
               : () => signIn("spotify", { callbackUrl: "/" })
           }
-          connected={session != undefined}
+          connected={session != null}
           textOnConnected={session?.user.name}
           avatar={session?.user.image}
+          disabled={!isConnected}
         />
       ),
     },
     mintNFT: {
       text: "Turn Your Music Taste Into NFT!",
-      ButtonElement: <BaseButton text="Let's go!" />,
+      ButtonElement: (
+        <BaseButton disabled={!isConnected || !session} text="Let's go!" />
+      ),
     },
   };
 

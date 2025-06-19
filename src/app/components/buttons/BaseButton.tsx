@@ -1,9 +1,9 @@
 import React from "react";
 import { ButtonProps } from "@/app/types/button.types";
 
-const BaseButton: React.FC<ButtonProps> = ({ text, onClick }) => {
+const BaseButton: React.FC<ButtonProps> = ({ text, onClick, disabled }) => {
   return (
-    <button className="task-button" onClick={onClick}>
+    <button className="task-button" onClick={onClick} disabled={disabled}>
       {text}
     </button>
   );
