@@ -1,4 +1,3 @@
-import { ButtonProps } from "@/app/types/button.types";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useAccount } from "wagmi";
 import ButtonWithAvatar from "./ButtonWithAvatar";
