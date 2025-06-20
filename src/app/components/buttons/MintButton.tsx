@@ -8,7 +8,7 @@ import { useState } from "react";
 const MintButton = () => {
   const { data: session } = useSession();
   const { address, isConnected } = useAccount();
-  const [message, setMessage] = useState<string>("");
+  const [, setMessage] = useState<string>("");
 
   const handleCheckMintStatus = async () => {
     try {
