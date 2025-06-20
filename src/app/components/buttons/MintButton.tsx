@@ -15,7 +15,7 @@ const MintButton = () => {
       const resp = await fetch("api/verify/checkMintStatus", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ address }),
+        body: JSON.stringify({ walletAddress: address }),
       });
       const data = await resp.json();
       if (!resp.ok) {
