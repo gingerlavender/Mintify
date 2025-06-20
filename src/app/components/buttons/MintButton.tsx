@@ -22,15 +22,15 @@ const MintButton = () => {
         throw new Error(data.error);
       }
       setMessage(data.status);
+      console.log(data.status);
     } catch (error) {
       if (error instanceof Error) {
         setMessage(error.message);
+        console.log(error.message);
       } else {
         setMessage("Unknown error");
       }
     }
-
-    console.log(message);
   };
 
   return (
