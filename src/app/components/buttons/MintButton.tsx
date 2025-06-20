@@ -12,7 +12,7 @@ const MintButton = () => {
 
   const handleCheckMintStatus = async () => {
     try {
-      const resp = await fetch("api/verify/checkMintStatus", {
+      const resp = await fetch("api/mint/status", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ walletAddress: address }),
@@ -21,8 +21,8 @@ const MintButton = () => {
       if (!resp.ok) {
         throw new Error(data.error);
       }
-      setMessage(data.status);
-      console.log(data.status);
+      setMessage(data.mintStatus);
+      console.log(data.mintStatus);
     } catch (error) {
       if (error instanceof Error) {
         setMessage(error.message);

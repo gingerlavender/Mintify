@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       data: { wallet: walletAddress },
     });
 
-    return NextResponse.json({ status: "first_mint" });
+    return NextResponse.json({ mintStatus: "first" });
   }
 
   if (user.wallet == walletAddress) {
@@ -41,9 +41,9 @@ export async function POST(req: Request) {
       where: { userId: user.id },
     });
     if (!nft) {
-      return NextResponse.json({ status: "first_mint" });
+      return NextResponse.json({ mintStatus: "first" });
     }
-    return NextResponse.json({ status: "remint" });
+    return NextResponse.json({ mintStatus: "repeated" });
   }
 
   return NextResponse.json(
