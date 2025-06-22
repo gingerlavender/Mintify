@@ -8,7 +8,7 @@ import {
 } from "@headlessui/react";
 import { AnimatePresence, motion } from "framer-motion";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { MintStatus } from "../types/mint";
 import { useAccount } from "wagmi";
 import { checkMintStatus } from "@/lib/mint";
@@ -24,12 +24,18 @@ export const useMintStatusModal = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
   const [loader, setLoader] = useState<boolean>(false);
+
   const { address } = useAccount();
+
+  const wasOpenedRef = useRef<boolean>(false);
 
   const closeMintStatusModal = () => setIsOpen(false);
   const openMintStatusModal = () => setIsOpen(true);
 
   useEffect(() => {
+    if (isOpen) {
+      wasOpenedRef.current = true;
+    }
     if (isOpen && address) {
       (async () => {
         setLoader(true);
@@ -67,7 +73,7 @@ export const useMintStatusModal = () => {
             <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
               <DialogPanel
                 as={motion.div}
-                initial={{ y: "100%", opacity: 0 }}
+                initial={wasOpenedRef ? false : { y: "100%", opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 className="flex flex-col items-center max-w-[90%] md:max-w-lg space-y-4 rounded-2xl backdrop-blur-3xl bg-gray-100 p-10 transition-all duration-75 ease-linear"
               >
