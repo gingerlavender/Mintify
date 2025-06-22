@@ -8,7 +8,7 @@ import {
 } from "@headlessui/react";
 import { AnimatePresence, motion } from "framer-motion";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MintStatus } from "../types/mint";
 import { useAccount } from "wagmi";
 import { checkMintStatus } from "@/lib/mint";
