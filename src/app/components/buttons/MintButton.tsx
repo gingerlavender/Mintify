@@ -11,6 +11,7 @@ const MintButton = () => {
   const { data: session } = useSession();
   const { address, isConnected } = useAccount();
   const [message, setMessage] = useState<string>("");
+  const [loader, setLoader] = useState<boolean>(false);
 
   const { MintStatusModal, open } = useMintStatusModal();
 
@@ -22,6 +23,7 @@ const MintButton = () => {
   };
 
   const handleCheckMintStatus = async () => {
+    setLoader(true);
     try {
       const resp = await fetch("api/mint/status", {
         method: "POST",
@@ -41,6 +43,7 @@ const MintButton = () => {
         setMessage("Unknown error");
       }
     } finally {
+      setLoader(false);
       open();
     }
   };
@@ -49,7 +52,7 @@ const MintButton = () => {
     <>
       <BaseButton
         disabled={!session || !isConnected}
-        text="Let's go!"
+        text={loader ? "Loading..." : "Let's go!"}
         onClick={handleCheckMintStatus}
       />
       <MintStatusModal message={message} />
