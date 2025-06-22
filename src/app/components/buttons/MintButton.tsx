@@ -4,8 +4,9 @@ import { useSession } from "next-auth/react";
 import BaseButton from "./BaseButton";
 import { useAccount } from "wagmi";
 import { useMintStatusModal } from "@/app/hooks/useMintStatusModal";
+import { memo } from "react";
 
-const MintButton = () => {
+const MintButton = memo(() => {
   const { data: session } = useSession();
   const { isConnected } = useAccount();
 
@@ -21,6 +22,6 @@ const MintButton = () => {
       <MintStatusModal />
     </>
   );
-};
+});
 
 export default MintButton;
