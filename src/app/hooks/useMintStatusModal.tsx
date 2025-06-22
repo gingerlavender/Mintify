@@ -41,7 +41,7 @@ export const useMintStatusModal = () => {
                 <p>{message}</p>
                 <img
                   className="w-[50vw] md:w-[20vw] rounded-2xl"
-                  src="https://crimson-bitter-horse-871.mypinata.cloud/ipfs/bafkreib2imobphpiera2ldobkxdcfij4e7clkc3z7ftghwsng357t4gdka"
+                  src="/NFTPlaceholder.png"
                   alt="NFT Preview"
                 />
                 <div className="flex justify-center gap-4">
