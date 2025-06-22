@@ -6,7 +6,7 @@ import { useAccount } from "wagmi";
 import { useMintStatusModal } from "@/app/hooks/useMintStatusModal";
 import { memo } from "react";
 
-const MintButton = memo(() => {
+const MintButton = memo(function MintButton() {
   const { data: session } = useSession();
   const { isConnected } = useAccount();
 
