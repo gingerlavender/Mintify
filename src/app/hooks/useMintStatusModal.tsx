@@ -79,6 +79,9 @@ export const useMintStatusModal = () => {
                     : { y: "100%", opacity: 0 }
                 }
                 animate={{ y: 0, opacity: 1 }}
+                onAnimationComplete={() => {
+                  hasAnimatedRef.current = true;
+                }}
                 className="flex flex-col items-center max-w-[90%] md:max-w-lg space-y-4 rounded-2xl backdrop-blur-3xl bg-gray-100 p-10 transition-all duration-75 ease-linear"
               >
                 <DialogTitle className="font-bold">
