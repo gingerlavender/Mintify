@@ -9,15 +9,15 @@ export const useTaskType = (taskType: TaskType) => {
   const taskConfigs: Record<TaskType, TaskConfig> = {
     walletConnect: {
       text: "Connect Your Wallet",
-      ButtonElement: <WalletConnectButton />,
+      ButtonComponent: () => <WalletConnectButton />,
     },
     spotifyConnect: {
       text: "Connect Your Spotify Account",
-      ButtonElement: <SpotifyConnectButton />,
+      ButtonComponent: () => <SpotifyConnectButton />,
     },
     mintNFT: {
       text: "Turn Your Music Taste Into NFT!",
-      ButtonElement: <MintButton />,
+      ButtonComponent: () => <MintButton />,
     },
   };
 

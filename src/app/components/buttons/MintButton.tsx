@@ -4,11 +4,23 @@ import { useSession } from "next-auth/react";
 import BaseButton from "./BaseButton";
 import { useAccount } from "wagmi";
 import { useState } from "react";
+import { MintStatus, MintStatusResponse } from "@/app/types/mint.types";
+import { useMintStatusModal } from "@/app/hooks/useMintStatusModal";
 
 const MintButton = () => {
   const { data: session } = useSession();
   const { address, isConnected } = useAccount();
-  const [, setMessage] = useState<string>("");
+  const [mintStatus, setMintStatus] = useState<MintStatus>();
+  const [message, setMessage] = useState<string>("");
+
+  const { MintStatusModal, open } = useMintStatusModal(message);
+
+  const messages: Record<MintStatus, string> = {
+    first:
+      "This will be your first mint! Let's sooner find out what you'll get!",
+    repeated:
+      "You can see yout current NFT below. Remember You can remint it any time!",
+  };
 
   const handleCheckMintStatus = async () => {
     try {
@@ -18,27 +30,32 @@ const MintButton = () => {
         body: JSON.stringify({ walletAddress: address }),
       });
       const data = await resp.json();
-      if (!resp.ok) {
-        throw new Error(data.error);
-      }
-      setMessage(data.mintStatus);
-      console.log(data.mintStatus);
+      setMintStatus(data.mintStatus);
+      setMessage(
+        data.success == "true"
+          ? messages[data.mintStatus as MintStatus]
+          : `Error: ${data.error}`
+      );
     } catch (error) {
       if (error instanceof Error) {
-        setMessage(error.message);
-        console.log(error.message);
+        setMessage(`Error: ${error.message}`);
       } else {
         setMessage("Unknown error");
       }
+    } finally {
+      open();
     }
   };
 
   return (
-    <BaseButton
-      disabled={!isConnected || !session}
-      text="Let's go!"
-      onClick={handleCheckMintStatus}
-    />
+    <>
+      <BaseButton
+        disabled={!session || !isConnected}
+        text="Let's go!"
+        onClick={handleCheckMintStatus}
+      />
+      <MintStatusModal message={message} />
+    </>
   );
 };
 

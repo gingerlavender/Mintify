@@ -6,5 +6,5 @@ export interface TaskProps {
 
 export interface TaskConfig {
   text: string;
-  ButtonElement: JSX.Element;
+  ButtonComponent: React.FC;
 }

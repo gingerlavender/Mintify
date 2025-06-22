@@ -2,19 +2,23 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import { MintStatusResponse } from "@/app/types/mint.types";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 
   if (!session || !session.user.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json<MintStatusResponse>(
+      { success: "false", error: "Unauthorized" },
+      { status: 401 }
+    );
   }
 
   const { walletAddress } = await req.json();
 
   if (!walletAddress) {
-    return NextResponse.json(
-      { error: "Missing wallet address" },
+    return NextResponse.json<MintStatusResponse>(
+      { success: "false", error: "Missing wallet address" },
       { status: 400 }
     );
   }
@@ -24,7 +28,10 @@ export async function POST(req: Request) {
   });
 
   if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+    return NextResponse.json<MintStatusResponse>(
+      { success: "false", error: "User not found" },
+      { status: 404 }
+    );
   }
 
   if (!user.wallet) {
@@ -33,7 +40,10 @@ export async function POST(req: Request) {
       data: { wallet: walletAddress },
     });
 
-    return NextResponse.json({ mintStatus: "first" });
+    return NextResponse.json<MintStatusResponse>({
+      success: "true",
+      mintStatus: "first",
+    });
   }
 
   if (user.wallet == walletAddress) {
@@ -41,15 +51,23 @@ export async function POST(req: Request) {
       where: { userId: user.id },
     });
     if (!nft) {
-      return NextResponse.json({ mintStatus: "first" });
+      return NextResponse.json<MintStatusResponse>({
+        success: "true",
+        mintStatus: "first",
+      });
     }
-    return NextResponse.json({ mintStatus: "repeated" });
+    return NextResponse.json<MintStatusResponse>({
+      success: "true",
+      mintStatus: "repeated",
+    });
   }
 
-  return NextResponse.json(
+  return NextResponse.json<MintStatusResponse>(
     {
+      success: "false",
       error:
-        "Wallet mismatch: your wallet is not linked to your Spotify account",
+        "wallet mismatch. Your wallet is not linked to your Spotify account",
+      mintStatus: "none",
     },
     { status: 403 }
   );
