@@ -33,27 +33,31 @@ export const useMintStatusModal = () => {
   const openMintStatusModal = () => setIsOpen(true);
 
   useEffect(() => {
-    if (isOpen && address) {
+    if (isOpen) {
       wasOpenedRef.current = true;
-      (async () => {
-        setLoader(true);
-        try {
-          const data = await checkMintStatus(address);
-          setMessage(
-            data.success == "true"
-              ? messages[data.mintStatus as MintStatus]
-              : `Error: ${data.error}`
-          );
-        } catch (error) {
-          if (error instanceof Error) {
-            setMessage(`Error: ${error.message}`);
-          } else {
-            setMessage("Unknown error");
+      if (address) {
+        (async () => {
+          setLoader(true);
+          try {
+            const data = await checkMintStatus(address);
+            setMessage(
+              data.success == "true"
+                ? messages[data.mintStatus as MintStatus]
+                : `Error: ${data.error}`
+            );
+          } catch (error) {
+            if (error instanceof Error) {
+              setMessage(`Error: ${error.message}`);
+            } else {
+              setMessage("Unknown error");
+            }
+          } finally {
+            setLoader(false);
           }
-        } finally {
-          setLoader(false);
-        }
-      })();
+        })();
+      }
+    } else {
+      wasOpenedRef.current = false;
     }
   }, [isOpen, address]);
 
