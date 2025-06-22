@@ -32,6 +32,7 @@ export const useMintStatusModal = () => {
   const openMintStatusModal = () => setIsOpen(true);
 
   const closeMintStatusModal = () => {
+    hasAnimatedRef.current = false;
     setIsOpen(false);
   };
 
