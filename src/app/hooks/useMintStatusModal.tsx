@@ -14,7 +14,8 @@ import { useAccount } from "wagmi";
 import { checkMintStatus } from "@/lib/mint";
 
 const messages: Record<MintStatus, string> = {
-  first: "This will be your first mint! Let's sooner find out what you'll get!",
+  first:
+    "This is going to be your first mint! Let's sooner find out what you'll get!",
   repeated:
     "You can see yout current NFT below. Remember You can remint it any time!",
 };
