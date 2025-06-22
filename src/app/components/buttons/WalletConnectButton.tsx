@@ -1,7 +1,6 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { isMobile, isMetaMaskBrowser, metamaskDeepLink } from "@/lib/mobile";
 import ButtonWithAvatar from "./ButtonWithAvatar";
 
 const WalletConnectButton = () => {
@@ -25,11 +24,7 @@ const WalletConnectButton = () => {
 
         const handleConnectClick = () => {
           if (!connected) {
-            if (isMobile() && !isMetaMaskBrowser()) {
-              window.location.href = metamaskDeepLink();
-            } else {
-              openConnectModal?.();
-            }
+            openConnectModal?.();
           } else {
             openAccountModal?.();
           }
