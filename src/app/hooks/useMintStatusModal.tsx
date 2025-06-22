@@ -29,37 +29,35 @@ export const useMintStatusModal = () => {
 
   const wasOpenedRef = useRef<boolean>(false);
 
-  const openMintStatusModal = () => {
-    wasOpenedRef.current = true;
-    setIsOpen(true);
-  };
-
-  const closeMintStatusModal = () => {
-    wasOpenedRef.current = false;
-    setIsOpen(false);
-  };
+  const openMintStatusModal = () => setIsOpen(true);
+  const closeMintStatusModal = () => setIsOpen(false);
 
   useEffect(() => {
-    if (isOpen && address) {
-      (async () => {
-        setLoader(true);
-        try {
-          const data = await checkMintStatus(address);
-          setMessage(
-            data.success == "true"
-              ? messages[data.mintStatus as MintStatus]
-              : `Error: ${data.error}`
-          );
-        } catch (error) {
-          if (error instanceof Error) {
-            setMessage(`Error: ${error.message}`);
-          } else {
-            setMessage("Unknown error");
+    if (isOpen) {
+      wasOpenedRef.current = true;
+      if (address) {
+        (async () => {
+          setLoader(true);
+          try {
+            const data = await checkMintStatus(address);
+            setMessage(
+              data.success == "true"
+                ? messages[data.mintStatus as MintStatus]
+                : `Error: ${data.error}`
+            );
+          } catch (error) {
+            if (error instanceof Error) {
+              setMessage(`Error: ${error.message}`);
+            } else {
+              setMessage("Unknown error");
+            }
+          } finally {
+            setLoader(false);
           }
-        } finally {
-          setLoader(false);
-        }
-      })();
+        })();
+      } else {
+        wasOpenedRef.current = false;
+      }
     }
   }, [isOpen, address]);
 
