@@ -27,37 +27,30 @@ export const useMintStatusModal = () => {
 
   const { address } = useAccount();
 
-  const wasOpenedRef = useRef<boolean>(false);
-
   const openMintStatusModal = () => setIsOpen(true);
   const closeMintStatusModal = () => setIsOpen(false);
 
   useEffect(() => {
-    if (isOpen) {
-      wasOpenedRef.current = true;
-      if (address) {
-        (async () => {
-          setLoader(true);
-          try {
-            const data = await checkMintStatus(address);
-            setMessage(
-              data.success == "true"
-                ? messages[data.mintStatus as MintStatus]
-                : `Error: ${data.error}`
-            );
-          } catch (error) {
-            if (error instanceof Error) {
-              setMessage(`Error: ${error.message}`);
-            } else {
-              setMessage("Unknown error");
-            }
-          } finally {
-            setLoader(false);
+    if (isOpen && address) {
+      (async () => {
+        setLoader(true);
+        try {
+          const data = await checkMintStatus(address);
+          setMessage(
+            data.success == "true"
+              ? messages[data.mintStatus as MintStatus]
+              : `Error: ${data.error}`
+          );
+        } catch (error) {
+          if (error instanceof Error) {
+            setMessage(`Error: ${error.message}`);
+          } else {
+            setMessage("Unknown error");
           }
-        })();
-      } else {
-        wasOpenedRef.current = false;
-      }
+        } finally {
+          setLoader(false);
+        }
+      })();
     }
   }, [isOpen, address]);
 
@@ -74,10 +67,9 @@ export const useMintStatusModal = () => {
             <DialogBackdrop className="fixed inset-0 bg-black/30" />
             <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
               <DialogPanel
+                key={isOpen ? "open" : "closed"}
                 as={motion.div}
-                initial={
-                  wasOpenedRef.current ? false : { y: "100%", opacity: 0 }
-                }
+                initial={{ y: "100%", opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 className="flex flex-col items-center max-w-[90%] md:max-w-lg space-y-4 rounded-2xl backdrop-blur-3xl bg-gray-100 p-10 transition-all duration-75 ease-linear"
               >
