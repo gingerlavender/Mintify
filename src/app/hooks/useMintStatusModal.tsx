@@ -33,10 +33,8 @@ export const useMintStatusModal = () => {
   const openMintStatusModal = () => setIsOpen(true);
 
   useEffect(() => {
-    if (isOpen) {
-      wasOpenedRef.current = true;
-    }
     if (isOpen && address) {
+      wasOpenedRef.current = true;
       (async () => {
         setLoader(true);
         try {
