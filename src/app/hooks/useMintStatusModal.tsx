@@ -9,7 +9,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 
 import React, { useState } from "react";
-import { MintStatusModalProps } from "../types/mint.types";
+import { MintStatusModalProps } from "../types/mint";
 
 export const useMintStatusModal = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);

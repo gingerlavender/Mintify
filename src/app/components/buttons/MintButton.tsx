@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import BaseButton from "./BaseButton";
 import { useAccount } from "wagmi";
 import { useState } from "react";
-import { MintStatus } from "@/app/types/mint.types";
+import { MintStatus } from "@/app/types/mint";
 import { useMintStatusModal } from "@/app/hooks/useMintStatusModal";
 
 const MintButton = () => {
