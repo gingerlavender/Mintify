@@ -11,7 +11,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import React, { useState } from "react";
 import { MintStatusModalProps } from "../types/mint.types";
 
-export const useMintStatusModal = (message: string) => {
+export const useMintStatusModal = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const close = () => setIsOpen(false);

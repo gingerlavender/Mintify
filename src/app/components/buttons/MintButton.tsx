@@ -4,16 +4,15 @@ import { useSession } from "next-auth/react";
 import BaseButton from "./BaseButton";
 import { useAccount } from "wagmi";
 import { useState } from "react";
-import { MintStatus, MintStatusResponse } from "@/app/types/mint.types";
+import { MintStatus } from "@/app/types/mint.types";
 import { useMintStatusModal } from "@/app/hooks/useMintStatusModal";
 
 const MintButton = () => {
   const { data: session } = useSession();
   const { address, isConnected } = useAccount();
-  const [mintStatus, setMintStatus] = useState<MintStatus>();
   const [message, setMessage] = useState<string>("");
 
-  const { MintStatusModal, open } = useMintStatusModal(message);
+  const { MintStatusModal, open } = useMintStatusModal();
 
   const messages: Record<MintStatus, string> = {
     first:
@@ -30,7 +29,6 @@ const MintButton = () => {
         body: JSON.stringify({ walletAddress: address }),
       });
       const data = await resp.json();
-      setMintStatus(data.mintStatus);
       setMessage(
         data.success == "true"
           ? messages[data.mintStatus as MintStatus]
