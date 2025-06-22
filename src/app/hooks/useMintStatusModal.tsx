@@ -77,7 +77,9 @@ export const useMintStatusModal = () => {
             <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
               <DialogPanel
                 as={motion.div}
-                initial={wasOpenedRef ? false : { y: "100%", opacity: 0 }}
+                initial={
+                  wasOpenedRef.current ? false : { y: "100%", opacity: 0 }
+                }
                 animate={{ y: 0, opacity: 1 }}
                 className="flex flex-col items-center max-w-[90%] md:max-w-lg space-y-4 rounded-2xl backdrop-blur-3xl bg-gray-100 p-10 transition-all duration-75 ease-linear"
               >
