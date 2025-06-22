@@ -17,7 +17,7 @@ const messages: Record<MintStatus, string> = {
   first:
     "This is going to be your first mint! Let's sooner find out what you'll get!",
   repeated:
-    "You can see yout current NFT below. Remember You can remint it any time!",
+    "You can see yout current NFT below. Remember you can remint it any time!",
 };
 
 export const useMintStatusModal = () => {
@@ -81,7 +81,9 @@ export const useMintStatusModal = () => {
                 }
                 animate={{ y: 0, opacity: 1 }}
                 onAnimationComplete={() => {
-                  hasAnimatedRef.current = true;
+                  if (!loader) {
+                    hasAnimatedRef.current = true;
+                  }
                 }}
                 className="flex flex-col items-center max-w-[90%] md:max-w-lg space-y-4 rounded-2xl backdrop-blur-3xl bg-gray-100 p-10 transition-all duration-75 ease-linear"
               >
