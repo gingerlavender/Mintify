@@ -8,23 +8,58 @@ import {
 } from "@headlessui/react";
 import { AnimatePresence, motion } from "framer-motion";
 
-import React, { useState } from "react";
-import { MintStatusModalProps } from "../types/mint";
+import React, { useEffect, useState } from "react";
+import { MintStatus } from "../types/mint";
+import { useAccount } from "wagmi";
+import { checkMintStatus } from "@/lib/mint";
+
+const messages: Record<MintStatus, string> = {
+  first: "This will be your first mint! Let's sooner find out what you'll get!",
+  repeated:
+    "You can see yout current NFT below. Remember You can remint it any time!",
+};
 
 export const useMintStatusModal = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+  const [loader, setLoader] = useState<boolean>(false);
+  const { address } = useAccount();
 
-  const close = () => setIsOpen(false);
-  const open = () => setIsOpen(true);
+  const closeMintStatusModal = () => setIsOpen(false);
+  const openMintStatusModal = () => setIsOpen(true);
+
+  useEffect(() => {
+    if (isOpen && address) {
+      (async () => {
+        setLoader(true);
+        try {
+          const data = await checkMintStatus(address);
+          setMessage(
+            data.success == "true"
+              ? messages[data.mintStatus as MintStatus]
+              : `Error: ${data.error}`
+          );
+        } catch (error) {
+          if (error instanceof Error) {
+            setMessage(`Error: ${error.message}`);
+          } else {
+            setMessage("Unknown error");
+          }
+        } finally {
+          setLoader(false);
+        }
+      })();
+    }
+  }, [isOpen, address]);
 
   return {
-    MintStatusModal: ({ message }: MintStatusModalProps) => (
+    MintStatusModal: () => (
       <AnimatePresence>
         {isOpen && (
           <Dialog
             static
             open={isOpen}
-            onClose={close}
+            onClose={closeMintStatusModal}
             className="text-black font-[Inter] font-[300] relative z-50 text-center"
           >
             <DialogBackdrop className="fixed inset-0 bg-black/30" />
@@ -38,27 +73,33 @@ export const useMintStatusModal = () => {
                 <DialogTitle className="font-bold">
                   Your Mint Status
                 </DialogTitle>
-                <p>{message}</p>
-                <img
-                  className="w-[50vw] md:w-[20vw] rounded-2xl"
-                  src="/NFTPlaceholder.png"
-                  alt="NFT Preview"
-                />
-                <div className="flex justify-center gap-4">
-                  <button
-                    className="bg-white/100 rounded-xl p-3 md:min-w-[10vw] min-w-[30vw] font-[400] hover:scale-[103%] hover:bg-white/60 cursor-pointer transition-all duration-200 shadow-xs"
-                    onClick={close}
-                  >
-                    Mint
-                  </button>
-                </div>
+                {loader ? (
+                  <p>Loading...</p>
+                ) : (
+                  <>
+                    <p>{message}</p>
+                    <img
+                      className="w-[50vw] md:w-[20vw] rounded-2xl"
+                      src="/NFTPlaceholder.png"
+                      alt="NFT Preview"
+                    />
+                    <div className="flex justify-center gap-4">
+                      <button
+                        className="bg-white/100 rounded-xl p-3 md:min-w-[10vw] min-w-[30vw] font-[400] hover:scale-[103%] hover:bg-white/60 cursor-pointer transition-all duration-200 shadow-xs"
+                        onClick={closeMintStatusModal}
+                      >
+                        Mint
+                      </button>
+                    </div>
+                  </>
+                )}
               </DialogPanel>
             </div>
           </Dialog>
         )}
       </AnimatePresence>
     ),
-    open,
-    close,
+    openMintStatusModal,
+    closeMintStatusModal,
   };
 };

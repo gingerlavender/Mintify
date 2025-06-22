@@ -5,7 +5,3 @@ export interface MintStatusResponse {
   mintStatus?: string;
   error?: string;
 }
-
-export interface MintStatusModalProps {
-  message: string;
-}
