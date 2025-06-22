@@ -90,9 +90,8 @@ export const useMintStatusModal = () => {
                 <DialogTitle className="font-bold">
                   Your Mint Status
                 </DialogTitle>
-                {loader ? (
-                  <p>Loading...</p>
-                ) : (
+                {loader && <p>Loading...</p>}
+                {!loader && (
                   <>
                     <p>{message}</p>
                     <img
@@ -110,6 +109,7 @@ export const useMintStatusModal = () => {
                     </div>
                   </>
                 )}
+                )
               </DialogPanel>
             </div>
           </Dialog>
