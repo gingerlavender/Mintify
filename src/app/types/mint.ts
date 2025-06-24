@@ -1,7 +1,16 @@
 export type MintStatus = "first" | "repeated";
 
-export interface MintStatusResponse {
-  success: "true" | "false";
-  mintStatus?: string;
-  error?: string;
-}
+export type MintStatusResult =
+  | {
+      mintStatus: "first";
+    }
+  | {
+      mintStatus: "repeated";
+      tokenURI: string;
+    };
+
+export type MintStatusError = {
+  error: string;
+};
+
+export type MintStatusResponse = MintStatusResult | MintStatusError;

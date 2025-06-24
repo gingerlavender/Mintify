@@ -11,7 +11,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import { MintStatus } from "../types/mint";
 import { useAccount } from "wagmi";
-import { checkMintStatus } from "@/lib/mint";
+import { getMintStatus } from "@/lib/mint";
 
 const messages: Record<MintStatus, string> = {
   first:
@@ -23,7 +23,8 @@ const messages: Record<MintStatus, string> = {
 export const useMintStatusModal = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
-  const [loader, setLoader] = useState<boolean>(false);
+  const [picture, setPicture] = useState<string>("/NFTPlaceholder.png");
+  const [loader, setLoader] = useState<boolean>(true);
 
   const { address } = useAccount();
 
@@ -39,20 +40,19 @@ export const useMintStatusModal = () => {
   useEffect(() => {
     if (isOpen && address) {
       (async () => {
-        setLoader(true);
         try {
-          const data = await checkMintStatus(address);
-          setMessage(
-            data.success == "true"
-              ? messages[data.mintStatus as MintStatus]
-              : `Error: ${data.error}`
-          );
+          const data = await getMintStatus(address);
+          setMessage(messages[data.mintStatus]);
+          if (data.mintStatus == "repeated") {
+            setPicture(data.tokenURI);
+          }
         } catch (error) {
           if (error instanceof Error) {
             setMessage(`Error: ${error.message}`);
           } else {
             setMessage("Unknown error");
           }
+          setPicture("/Error.png");
         } finally {
           setLoader(false);
         }
@@ -96,7 +96,7 @@ export const useMintStatusModal = () => {
                     <p>{message}</p>
                     <img
                       className="w-[50vw] md:w-[20vw] rounded-2xl"
-                      src="/NFTPlaceholder.png"
+                      src={picture}
                       alt="NFT Preview"
                     />
                     <div className="flex justify-center gap-4">

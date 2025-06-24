@@ -9,7 +9,7 @@ export async function POST(req: Request) {
 
   if (!session || !session.user.id) {
     return NextResponse.json<MintStatusResponse>(
-      { success: "false", error: "Unauthorized" },
+      { error: "Unauthorized" },
       { status: 401 }
     );
   }
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
   if (!walletAddress) {
     return NextResponse.json<MintStatusResponse>(
-      { success: "false", error: "Missing wallet address" },
+      { error: "Missing wallet address" },
       { status: 400 }
     );
   }
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
   if (!user) {
     return NextResponse.json<MintStatusResponse>(
-      { success: "false", error: "User not found" },
+      { error: "User not found" },
       { status: 404 }
     );
   }
@@ -41,7 +41,6 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json<MintStatusResponse>({
-      success: "true",
       mintStatus: "first",
     });
   }
@@ -52,22 +51,19 @@ export async function POST(req: Request) {
     });
     if (!nft) {
       return NextResponse.json<MintStatusResponse>({
-        success: "true",
         mintStatus: "first",
       });
     }
     return NextResponse.json<MintStatusResponse>({
-      success: "true",
       mintStatus: "repeated",
+      tokenURI: nft.tokenURI,
     });
   }
 
   return NextResponse.json<MintStatusResponse>(
     {
-      success: "false",
       error:
-        "wallet mismatch. Your wallet is not linked to your Spotify account",
-      mintStatus: "none",
+        "Wallet mismatch. Your wallet is not linked to your Spotify account",
     },
     { status: 403 }
   );
