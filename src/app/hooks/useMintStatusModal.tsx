@@ -39,6 +39,7 @@ export const useMintStatusModal = () => {
 
   useEffect(() => {
     if (isOpen && address) {
+      setLoader(true);
       (async () => {
         try {
           const data = await getMintStatus(address);
