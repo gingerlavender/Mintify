@@ -1,4 +1,4 @@
-import { MintStatusResult } from "@/app/types/mint";
+import { MintStatusResult } from "@/types/mint";
 
 export const getMintStatus = async (
   address: string

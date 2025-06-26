@@ -1,6 +1,6 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useAccount } from "wagmi";
-import ButtonWithAvatar from "./ButtonWithAvatar";
+import ButtonWithAvatar from "@/components/ui/buttons/ButtonWithAvatar";
 
 const SpotifyConnectButton = () => {
   const { data: session } = useSession();

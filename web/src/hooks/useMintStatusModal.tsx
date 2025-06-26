@@ -9,8 +9,8 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 
 import React, { useEffect, useRef, useState } from "react";
-import { MintStatus } from "../types/mint";
 import { useAccount } from "wagmi";
+import { MintStatus } from "@/types/mint";
 import { getMintStatus } from "@/lib/mint";
 
 const messages: Record<MintStatus, string> = {

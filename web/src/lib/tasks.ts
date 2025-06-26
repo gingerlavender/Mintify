@@ -1,7 +1,7 @@
-import { TaskConfig, TaskType } from "@/app/types/tasks";
-import WalletConnectButton from "@/app/components/buttons/WalletConnectButton";
-import SpotifyConnectButton from "@/app/components/buttons/SpotifyConnectButton";
-import MintButton from "@/app/components/buttons/MintButton";
+import { TaskConfig, TaskType } from "@/types/tasks";
+import WalletConnectButton from "@/components/features/wallet/WalletConnectButton";
+import SpotifyConnectButton from "@/components/features/spotify/SpotifyConnectButton";
+import MintButton from "@/components/features/mint/MintButton";
 
 const taskConfigs: Record<TaskType, TaskConfig> = {
   walletConnect: {

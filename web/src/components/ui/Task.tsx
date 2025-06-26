@@ -1,6 +1,6 @@
 "use client";
 
-import { TaskProps } from "../types/tasks";
+import { TaskProps } from "@/types/tasks";
 import { getTaskType } from "@/lib/tasks";
 
 const Task: React.FC<TaskProps> = ({ taskType }) => {

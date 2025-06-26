@@ -1,7 +1,7 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import ButtonWithAvatar from "./ButtonWithAvatar";
+import ButtonWithAvatar from "@/components/ui/buttons/ButtonWithAvatar";
 
 const WalletConnectButton = () => {
   return (

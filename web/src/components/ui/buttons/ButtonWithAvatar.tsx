@@ -1,5 +1,5 @@
 import React from "react";
-import { ButtonWithAvatarProps } from "@/app/types/button";
+import { ButtonWithAvatarProps } from "@/types/button";
 
 const ButtonWithAvatar: React.FC<ButtonWithAvatarProps> = ({
   text,

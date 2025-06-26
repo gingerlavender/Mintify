@@ -1,5 +1,5 @@
 import React from "react";
-import { ButtonProps } from "@/app/types/button";
+import { ButtonProps } from "@/types/button";
 
 const BaseButton: React.FC<ButtonProps> = ({ text, onClick, disabled }) => {
   return (
