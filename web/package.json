@@ -1,5 +1,5 @@
 {
-  "name": "mintify",
+  "name": "@mintify/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -24,7 +24,7 @@
     "next-auth": "^4.24.11",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "viem": "^2.31.1",
+    "viem": "^2.31.4",
     "wagmi": "^2.15.6"
   },
   "devDependencies": {

@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+*/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -40,4 +41,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# prisma
 /web/src/generated/prisma
+
+# foundry 
+
+/contracts/cache
+/contracts/lib
+/contracts/out
+/contracts/forge-snapshots
+coverage/   
