@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "postinstall": "curl -L https://foundry.paradigm.xyz | bash && export PATH=\"$HOME/.foundry/bin:$PATH\" && $HOME/.foundry/bin/foundryup && prisma generate && wagmi generate",
+    "postinstall": "chmod +x ./postinstall.sh && ./postinstall.sh",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
