@@ -13,6 +13,35 @@ const messages: Record<MintStatus, string> = {
     "You can see yout current NFT below. Remember you can remint it any time!",
 };
 
+const MintStatusModalContent = ({
+  message,
+  picture,
+  closeModal,
+}: {
+  message: string;
+  picture: string;
+  closeModal: () => void;
+}) => {
+  return (
+    <>
+      <p>{message}</p>
+      <img
+        className="w-[50vw] md:w-[20vw] rounded-2xl"
+        src={picture}
+        alt="NFT Preview"
+      />
+      <div className="flex justify-center gap-4">
+        <button
+          className="bg-white/100 rounded-xl p-3 md:min-w-[10vw] min-w-[30vw] font-[400] hover:scale-[103%] hover:bg-white/60 cursor-pointer transition-all duration-200 shadow-xs"
+          onClick={closeModal}
+        >
+          Mint
+        </button>
+      </div>
+    </>
+  );
+};
+
 export const useMintStatusModal = () => {
   const [message, setMessage] = useState<string>("");
   const [picture, setPicture] = useState<string>("/NFTPlaceholder.png");
@@ -26,22 +55,11 @@ export const useMintStatusModal = () => {
       title: "Your Mint Status",
       loading: true,
       content: (
-        <>
-          <p>{message}</p>
-          <img
-            className="w-[50vw] md:w-[20vw] rounded-2xl"
-            src={picture}
-            alt="NFT Preview"
-          />
-          <div className="flex justify-center gap-4">
-            <button
-              className="bg-white/100 rounded-xl p-3 md:min-w-[10vw] min-w-[30vw] font-[400] hover:scale-[103%] hover:bg-white/60 cursor-pointer transition-all duration-200 shadow-xs"
-              onClick={closeModal}
-            >
-              Mint
-            </button>
-          </div>
-        </>
+        <MintStatusModalContent
+          message={message}
+          picture={picture}
+          closeModal={closeModal}
+        />
       ),
     });
 
