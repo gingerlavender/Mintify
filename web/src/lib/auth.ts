@@ -21,6 +21,7 @@ export const authOptions: AuthOptions = {
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
+        session.user.wallet = user.wallet ?? null;
       }
       return session;
     },

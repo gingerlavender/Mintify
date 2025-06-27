@@ -34,17 +34,6 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!user.wallet) {
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { wallet: walletAddress },
-    });
-
-    return NextResponse.json<MintStatusResponse>({
-      mintStatus: "first",
-    });
-  }
-
   if (user.wallet == walletAddress) {
     const nft = await prisma.personalNFT.findUnique({
       where: { userId: user.id },
