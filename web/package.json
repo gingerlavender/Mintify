@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "install:foundry": "chmod +x ./install-foundry.sh && ./install-foundry.sh",
-    "postinstall": "prisma generate && wagmi generate",
+    "generate:all": "prisma generate && wagmi generate",
+    "postinstall": "install:foundry && generate:all",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
