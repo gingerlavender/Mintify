@@ -4,9 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "install:foundry": "chmod +x ./install-foundry.sh && ./install-foundry.sh",
-    "generate:all": "prisma generate && wagmi generate",
-    "postinstall": "npm run install:foundry && npm run generate:all",
+    "postinstall": "curl -L https://foundry.paradigm.xyz | bash && export PATH=\"$HOME/.foundry/bin:$PATH\" && $HOME/.foundry/bin/foundryup && prisma generate && wagmi generate",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
