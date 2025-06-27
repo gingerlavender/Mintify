@@ -18,7 +18,7 @@ cd ../contracts
 
 forge install OpenZeppelin/openzeppelin-contracts --no-git
 
-cd ..
+cd ../web
 
 echo "Generating Prisma client..."
 prisma generate
