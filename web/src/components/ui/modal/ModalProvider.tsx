@@ -43,9 +43,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const endLoading = () => {
-    if (modal?.loading == true) {
-      setModal((prev) => ({ ...prev, loading: false }));
-    }
+    setModal((prev) => ({ ...prev, loading: false }));
   };
 
   return (
