@@ -44,6 +44,9 @@ next-env.d.ts
 # prisma
 /web/src/generated/prisma
 
+#wagmi
+/web/src/generated/wagmi
+
 # foundry 
 
 /contracts/cache
