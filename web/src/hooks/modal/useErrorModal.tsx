@@ -16,7 +16,7 @@ export const useErrorModal = () => {
     onClick = closeModal,
   }: ErrorModalOptions) => {
     openModal({
-      title: "Error",
+      title: "Error :(",
       disableClose: true,
       content: (
         <ErrorModalContent

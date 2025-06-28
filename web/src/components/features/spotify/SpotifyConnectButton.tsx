@@ -1,13 +1,16 @@
 "use client";
 
 import { signIn, signOut, useSession } from "next-auth/react";
-import { useAccount } from "wagmi";
+import { useAccount, useSwitchAccount } from "wagmi";
 import ButtonWithAvatar from "@/components/ui/buttons/ButtonWithAvatar";
 import { useEffect } from "react";
+import { useErrorModal } from "@/hooks/modal/useErrorModal";
 
 const SpotifyConnectButton = () => {
   const { data: session } = useSession();
   const { isConnected, address } = useAccount();
+
+  const { openErrorModal } = useErrorModal();
 
   useEffect(() => {
     if (session && isConnected && address && !session.user.wallet) {
@@ -25,12 +28,9 @@ const SpotifyConnectButton = () => {
             throw new Error(data.error ?? "Unknown error");
           }
         } catch (error) {
-          let message;
-          if (error instanceof Error) {
-            message = error.message;
-          } else {
-            message = "Unknown error";
-          }
+          const message =
+            error instanceof Error ? error.message : "Unknown error";
+          openErrorModal({ message });
         }
       })();
     }
