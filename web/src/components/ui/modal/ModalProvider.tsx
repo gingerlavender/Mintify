@@ -32,10 +32,8 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const openModal = useCallback(
-    ({ disableClose = false, loading = false, ...options }: ModalOptions) => {
-      console.log("openModal called with loading:", loading);
-      setModal({ disableClose, loading, ...options, isOpen: true });
-    },
+    ({ disableClose = false, loading = false, ...options }: ModalOptions) =>
+      setModal({ disableClose, loading, ...options, isOpen: true }),
     []
   );
 
@@ -44,25 +42,14 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     []
   );
 
-  const endLoading = () => {
-    console.log("🔄 endLoading called, current loading state:", modal?.loading);
-    if (modal?.loading == true) {
-      console.log("✅ Setting loading to false");
-      setModal((prev) => {
-        console.log("📊 Previous state:", prev);
-        const newState = { ...prev, loading: false };
-        console.log("📊 New state:", newState);
-        return newState;
-      });
-    } else {
-      console.log(
-        "❌ Not updating loading state - current loading:",
-        modal?.loading
-      );
-    }
-  };
-
-  console.log("🎭 ModalProvider render - modal state:", modal);
+  const endLoading = useCallback(() => {
+    setModal((prev) => {
+      if (prev.loading) {
+        return { ...prev, loading: false };
+      }
+      return prev;
+    });
+  }, []);
 
   return (
     <ModalContext.Provider value={{ openModal, closeModal, endLoading }}>
