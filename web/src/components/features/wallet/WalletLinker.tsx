@@ -8,7 +8,7 @@ import { useAccount, useDisconnect } from "wagmi";
 import { useOnceWhen } from "@/hooks/useOnceWhen";
 
 const WalletLinker = () => {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { openErrorModal, closeErrorModal } = useErrorModal();
