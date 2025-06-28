@@ -9,7 +9,12 @@ const WalletGuard = () => {
   const { data: session } = useSession();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
-  const { openErrorModal } = useErrorModal();
+  const { openErrorModal, closeErrorModal } = useErrorModal();
+
+  const handleUserDisconnect = () => {
+    disconnect();
+    closeErrorModal();
+  };
 
   useEffect(() => {
     if (
@@ -22,7 +27,7 @@ const WalletGuard = () => {
         message:
           "This address is not linked to your current Spotify account. Please reconnect with correct wallet.",
         buttonText: "Disconnect",
-        onClick: () => disconnect(),
+        onClick: handleUserDisconnect,
       });
     }
   }, [session, address, isConnected]);

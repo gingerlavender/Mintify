@@ -28,5 +28,5 @@ export const useErrorModal = () => {
     });
   };
 
-  return { openErrorModal };
+  return { openErrorModal, closeErrorModal: closeModal };
 };
