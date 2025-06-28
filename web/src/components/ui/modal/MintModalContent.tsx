@@ -53,7 +53,7 @@ const MintModalContent: React.FC<MintModalContentProps> = ({
 
       endLoading();
     })();
-  }, []);
+  }, [address, startLoading, endLoading]);
 
   if (!isLoaded) {
     return <p>Loading...</p>;
