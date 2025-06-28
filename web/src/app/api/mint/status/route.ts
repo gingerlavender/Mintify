@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { MintStatusResponse } from "@/types/mint";
 import { assertNoWalletMismatch, assertValidConnection } from "@/lib/wallet";
+import { MintStatusResult } from "@/types/mint";
 
 const MintStatusRequestSchema = z.object({
   walletAddress: z
@@ -22,11 +22,11 @@ export async function POST(req: Request) {
       where: { userId: user.id },
     });
     if (!nft) {
-      return NextResponse.json<MintStatusResponse>({
+      return NextResponse.json<MintStatusResult>({
         mintStatus: "first",
       });
     }
-    return NextResponse.json<MintStatusResponse>({
+    return NextResponse.json<MintStatusResult>({
       mintStatus: "repeated",
       tokenURI: nft.tokenURI,
     });
