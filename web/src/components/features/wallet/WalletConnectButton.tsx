@@ -53,14 +53,14 @@ const WalletConnectButton = () => {
               <>
                 {chain.unsupported ? (
                   <button
-                    className="task-button min-w-fit ml-2 bg-red-500 text-white"
+                    className="task-button min-w-fit ml-2.5 bg-red-500 text-white"
                     onClick={openChainModal}
                   >
                     Unsupported Network
                   </button>
                 ) : (
                   <button
-                    className="task-button min-w-fit ml-2"
+                    className="task-button min-w-fit ml-2.5"
                     onClick={openChainModal}
                   >
                     {chain.name}
