@@ -2,8 +2,11 @@
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import ButtonWithAvatar from "@/components/ui/buttons/ButtonWithAvatar";
+import { useSession } from "next-auth/react";
 
 const WalletConnectButton = () => {
+  const { data: session } = useSession();
+
   return (
     <ConnectButton.Custom>
       {({
@@ -42,7 +45,7 @@ const WalletConnectButton = () => {
                 )}`
               }
               avatar={account?.ensAvatar}
-              disabled={!ready}
+              disabled={!ready || (!session && !connected)}
               connected={connected}
             />
 
