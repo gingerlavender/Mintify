@@ -1,11 +1,12 @@
 "use client";
 
 import { useErrorModal } from "@/hooks/modal/useErrorModal";
+import { apiRequest } from "@/lib/api";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef } from "react";
 import { useAccount, useDisconnect } from "wagmi";
 
-const WalletGuard = () => {
+const WalletLinker = () => {
   const { data: session } = useSession();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
@@ -23,13 +24,30 @@ const WalletGuard = () => {
   };
 
   useEffect(() => {
-    const hasSession = !!session?.user.wallet;
-    const hasWallet = address && isConnected;
+    if (session && isConnected && address && !session.user.wallet) {
+      (async () => {
+        const result = await apiRequest("api/user/wallet/link", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            walletAddress: address,
+          }),
+        });
+        if (!result.success) {
+          openErrorModal({ message: result.error });
+        }
+      })();
+    }
+  }, [session, isConnected, address]);
+
+  useEffect(() => {
+    const hasSessionWithStoredWallet = !!session?.user.wallet;
+    const loggedWithWalletProvider = address && isConnected;
     const walletsNotMatch =
       session?.user.wallet?.toLowerCase() != address?.toLowerCase();
 
-    if (hasSession) {
-      if (hasWallet) {
+    if (hasSessionWithStoredWallet) {
+      if (loggedWithWalletProvider) {
         if (walletsNotMatch) {
           if (!mismatchRef.current) {
             openErrorModal({
@@ -52,4 +70,4 @@ const WalletGuard = () => {
   return null;
 };
 
-export default WalletGuard;
+export default WalletLinker;
