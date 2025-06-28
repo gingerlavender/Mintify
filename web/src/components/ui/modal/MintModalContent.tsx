@@ -19,7 +19,7 @@ const MintModalContent: React.FC<MintModalContentProps> = ({
   address,
   closeModal,
 }) => {
-  const { isLoaded, startLoading, endLoading } = useLoading();
+  const { isLoading, startLoading, endLoading } = useLoading(true);
 
   const [message, setMessage] = useState<string>("");
   const [picture, setPicture] = useState<string>("/NFTPlaceholder.png");
@@ -55,7 +55,7 @@ const MintModalContent: React.FC<MintModalContentProps> = ({
     })();
   }, [address, startLoading, endLoading]);
 
-  if (!isLoaded) {
+  if (isLoading) {
     return <p>Loading...</p>;
   }
 
