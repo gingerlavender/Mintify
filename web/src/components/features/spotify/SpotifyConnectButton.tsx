@@ -6,7 +6,7 @@ import ButtonWithAvatar from "@/components/ui/buttons/ButtonWithAvatar";
 
 const SpotifyConnectButton = () => {
   const { data: session } = useSession();
-  const { isConnected, address } = useAccount();
+  const { isConnected } = useAccount();
 
   const handleSpotifyConnect = () => signIn("spotify", { callbackUrl: "/" });
   const handleSpotifyDisconnect = () => signOut();

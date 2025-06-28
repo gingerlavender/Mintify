@@ -15,10 +15,10 @@ const WalletLinker = () => {
 
   const mismatchRef = useRef<boolean>(false);
 
-  const resolveMismatch = () => {
+  const resolveMismatch = useCallback(() => {
     mismatchRef.current = false;
     closeErrorModal();
-  };
+  }, [closeErrorModal]);
 
   const handleUserConnect = useCallback(() => {
     (async () => {
@@ -33,11 +33,7 @@ const WalletLinker = () => {
         openErrorModal({ message: result.error });
       }
     })();
-  }, [session, address, isConnected]);
-
-  const handleUserDisconnect = () => {
-    disconnect();
-  };
+  }, [address, openErrorModal]);
 
   useOnceWhen(
     handleUserConnect,
@@ -58,7 +54,7 @@ const WalletLinker = () => {
               message:
                 "This address is not linked to your current Spotify account. Please reconnect with correct wallet.",
               buttonText: "Disconnect",
-              onClick: handleUserDisconnect,
+              onClick: () => disconnect(),
             });
             mismatchRef.current = true;
           }
@@ -69,7 +65,14 @@ const WalletLinker = () => {
         resolveMismatch();
       }
     }
-  }, [session, address, isConnected]);
+  }, [
+    session,
+    address,
+    isConnected,
+    openErrorModal,
+    disconnect,
+    resolveMismatch,
+  ]);
 
   return null;
 };

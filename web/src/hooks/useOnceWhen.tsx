@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 
-export function useOnceWhen(
+export const useOnceWhen = (
   effect: () => void | Promise<void>,
   condition: boolean
-) {
+) => {
   const hasRunRef = useRef(false);
 
   useEffect(() => {
@@ -12,4 +12,4 @@ export function useOnceWhen(
       void effect();
     }
   }, [condition, effect]);
-}
+};
