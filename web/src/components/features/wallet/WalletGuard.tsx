@@ -3,16 +3,16 @@
 import { useErrorModal } from "@/hooks/modal/useErrorModal";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
-import { useAccount, useReconnect } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
 
 const WalletGuard = () => {
   const { data: session } = useSession();
   const { address, isConnected } = useAccount();
-  const { reconnect } = useReconnect();
+  const { disconnect } = useDisconnect();
   const { openErrorModal, closeErrorModal } = useErrorModal();
 
   const handleUserReconnect = () => {
-    reconnect();
+    disconnect();
     closeErrorModal();
   };
 
