@@ -36,11 +36,9 @@ const MintModalContent: React.FC<MintModalContentProps> = ({
       }
 
       const result = await apiRequest<MintStatusResult>("api/mint/status", {
-        headers: {
-          "content-type": "application/json",
-          method: "POST",
-          body: JSON.stringify({ walletAddress: address }),
-        },
+        headers: { "content-type": "application/json" },
+        method: "POST",
+        body: JSON.stringify({ walletAddress: address }),
       });
 
       if (result.success) {
