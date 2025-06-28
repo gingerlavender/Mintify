@@ -23,7 +23,7 @@ const SpotifyConnectButton = () => {
       text={isLoading ? "Signing in..." : "Connect"}
       onClick={session ? handleSpotifyDisconnect : handleSpotifyConnect}
       connected={!!session}
-      textOnConnected={isLoading ? "Signin out..." : session?.user.name}
+      textOnConnected={isLoading ? "Signing out..." : session?.user.name}
       avatar={isLoading ? null : session?.user.image}
     />
   );
