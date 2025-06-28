@@ -20,11 +20,11 @@ const SpotifyConnectButton = () => {
 
   return (
     <ButtonWithAvatar
-      text={isLoading ? "Loading..." : "Connect"}
+      text={isLoading ? "Signing in..." : "Connect"}
       onClick={session ? handleSpotifyDisconnect : handleSpotifyConnect}
       connected={!!session}
-      textOnConnected={session?.user.name}
-      avatar={session?.user.image}
+      textOnConnected={isLoading ? "Signin out..." : session?.user.name}
+      avatar={isLoading ? null : session?.user.image}
     />
   );
 };
