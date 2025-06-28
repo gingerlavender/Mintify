@@ -21,7 +21,7 @@ export async function POST(req: Request) {
         where: { id: user.id },
         data: { wallet: walletAddress },
       });
-      return NextResponse.json({ success: true }, { status: 204 });
+      return NextResponse.json({ success: true });
     }
 
     throw new Error("Some wallet is already linked to this account");
