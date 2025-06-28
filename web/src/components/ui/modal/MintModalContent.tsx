@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { MintStatus } from "@/types/mint";
-import { getMintStatus } from "@/lib/mint";
+import { MintStatus, MintStatusResult } from "@/types/mint";
 import { useLoading } from "@/hooks/useLoading";
+import { apiRequest } from "@/lib/api";
 
 const messages: Record<MintStatus, string> = {
   first:
@@ -26,26 +26,34 @@ const MintModalContent: React.FC<MintModalContentProps> = ({
 
   useEffect(() => {
     (async () => {
-      try {
-        startLoading();
-        if (!address) {
-          throw new Error("Missing wallet address");
-        }
-        const data = await getMintStatus(address);
-        setMessage(messages[data.mintStatus]);
-        if (data.mintStatus == "repeated") {
-          setPicture(data.tokenURI);
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          setMessage(`Error: ${error.message}`);
-        } else {
-          setMessage("Unknown error");
-        }
-        setPicture("/Error.png");
-      } finally {
+      startLoading();
+
+      if (!address) {
+        setMessage("Missing wallet address");
+        setPicture("./Error.png");
         endLoading();
+        return;
       }
+
+      const result = await apiRequest<MintStatusResult>("api/mint/status", {
+        headers: {
+          "content-type": "application/json",
+          method: "POST",
+          body: JSON.stringify({ walletAddress: address }),
+        },
+      });
+
+      if (result.success) {
+        setMessage(messages[result.data.mintStatus]);
+        if (result.data.mintStatus == "repeated") {
+          setPicture(result.data.tokenURI);
+        }
+      } else {
+        setMessage(result.error);
+        setPicture("./Error.png");
+      }
+
+      endLoading();
     })();
   }, []);
 

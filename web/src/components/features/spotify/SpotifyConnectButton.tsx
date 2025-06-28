@@ -5,6 +5,7 @@ import { useAccount, useSwitchAccount } from "wagmi";
 import ButtonWithAvatar from "@/components/ui/buttons/ButtonWithAvatar";
 import { useEffect } from "react";
 import { useErrorModal } from "@/hooks/modal/useErrorModal";
+import { apiRequest } from "@/lib/api";
 
 const SpotifyConnectButton = () => {
   const { data: session } = useSession();
@@ -15,22 +16,15 @@ const SpotifyConnectButton = () => {
   useEffect(() => {
     if (session && isConnected && address && !session.user.wallet) {
       (async () => {
-        try {
-          const resp = await fetch("api/user/wallet/link", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({
-              walletAddress: address,
-            }),
-          });
-          const data = await resp.json();
-          if (!resp.ok) {
-            throw new Error(data.error ?? "Unknown error");
-          }
-        } catch (error) {
-          const message =
-            error instanceof Error ? error.message : "Unknown error";
-          openErrorModal({ message });
+        const result = await apiRequest("api/user/wallet/link", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            walletAddress: address,
+          }),
+        });
+        if (!result.success) {
+          openErrorModal({ message: result.error });
         }
       })();
     }

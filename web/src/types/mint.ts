@@ -8,9 +8,3 @@ export type MintStatusResult =
       mintStatus: "repeated";
       tokenURI: string;
     };
-
-export type MintStatusError = {
-  error: string;
-};
-
-export type MintStatusResponse = MintStatusResult | MintStatusError;
