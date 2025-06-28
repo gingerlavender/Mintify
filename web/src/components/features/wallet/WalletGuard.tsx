@@ -13,10 +13,13 @@ const WalletGuard = () => {
 
   const mismatchRef = useRef<boolean>(false);
 
-  const handleUserDisconnect = () => {
-    disconnect();
+  const resolveMismatch = () => {
     mismatchRef.current = false;
     closeErrorModal();
+  };
+
+  const handleUserDisconnect = () => {
+    disconnect();
   };
 
   useEffect(() => {
@@ -38,12 +41,10 @@ const WalletGuard = () => {
             mismatchRef.current = true;
           }
         } else if (mismatchRef.current) {
-          mismatchRef.current = false;
-          closeErrorModal();
+          resolveMismatch();
         }
-      } else {
-        mismatchRef.current = false;
-        closeErrorModal();
+      } else if (mismatchRef.current) {
+        resolveMismatch();
       }
     }
   }, [session, address, isConnected]);
