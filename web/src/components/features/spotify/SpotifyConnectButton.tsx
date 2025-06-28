@@ -10,7 +10,7 @@ const SpotifyConnectButton = () => {
   const { isConnected, address } = useAccount();
 
   useEffect(() => {
-    if (session && isConnected && address) {
+    if (session && isConnected && address && !session.user.wallet) {
       (async () => {
         try {
           const resp = await fetch("api/user/wallet/link", {
@@ -25,10 +25,11 @@ const SpotifyConnectButton = () => {
             throw new Error(data.error ?? "Unknown error");
           }
         } catch (error) {
+          let message;
           if (error instanceof Error) {
-            console.log(error.message);
+            message = error.message;
           } else {
-            console.log("Unknown error");
+            message = "Unknown error";
           }
         }
       })();

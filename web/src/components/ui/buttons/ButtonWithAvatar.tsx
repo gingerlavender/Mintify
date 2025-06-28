@@ -1,5 +1,11 @@
 import React from "react";
-import { ButtonWithAvatarProps } from "@/types/button";
+import { ButtonProps } from "./Button";
+
+export interface ButtonWithAvatarProps extends ButtonProps {
+  textOnConnected: string | null | undefined;
+  avatar: string | null | undefined;
+  connected: boolean | undefined;
+}
 
 const ButtonWithAvatar: React.FC<ButtonWithAvatarProps> = ({
   text,

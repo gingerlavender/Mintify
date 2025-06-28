@@ -10,12 +10,14 @@ const messages: Record<MintStatus, string> = {
     "You can see yout current NFT below. Remember you can remint it any time!",
 };
 
-const MintModalContent = ({
-  address,
-  closeModal,
-}: {
+interface MintModalContentProps {
   address: string | undefined;
   closeModal: () => void;
+}
+
+const MintModalContent: React.FC<MintModalContentProps> = ({
+  address,
+  closeModal,
 }) => {
   const { isLoaded, startLoading, endLoading } = useLoading();
 
@@ -60,10 +62,7 @@ const MintModalContent = ({
         alt="NFT Preview"
       />
       <div className="flex justify-center gap-4">
-        <button
-          className="bg-white/100 rounded-xl p-3 md:min-w-[10vw] min-w-[30vw] font-[400] hover:scale-[103%] hover:bg-white/60 cursor-pointer transition-all duration-200 shadow-xs"
-          onClick={closeModal}
-        >
+        <button className="modal-button" onClick={closeModal}>
           Mint
         </button>
       </div>
