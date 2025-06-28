@@ -7,11 +7,13 @@ import Menu from "@/components/layout/Menu";
 import { Web3Provider } from "@/components/features/wallet/Web3Provider";
 import { SessionProvider } from "next-auth/react";
 import { ModalProvider } from "@/components/ui/modal/ModalProvider";
+import WalletGuard from "@/components/features/wallet/WalletGuard";
 
 export default function Home() {
   return (
     <SessionProvider>
       <Web3Provider>
+        <WalletGuard />
         <Soundwave />
         <Header />
         <ModalProvider>
