@@ -16,9 +16,10 @@ const messages: Record<MintStatus, string> = {
 export const useMintStatusModal = () => {
   const { address } = useAccount();
 
-  const { openModal, closeModal, endLoading } = useModal();
+  const { openModal, closeModal } = useModal();
 
   const MintStatusModalContent = () => {
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [message, setMessage] = useState<string>("");
     const [picture, setPicture] = useState<string>("/NFTPlaceholder.png");
 
@@ -41,10 +42,14 @@ export const useMintStatusModal = () => {
           }
           setPicture("/Error.png");
         } finally {
-          endLoading();
+          setIsLoading(false);
         }
       })();
     }, []);
+
+    if (isLoading) {
+      return <p>Loading...</p>;
+    }
 
     return (
       <>
@@ -69,7 +74,6 @@ export const useMintStatusModal = () => {
   const openMintStatusModal = async () => {
     openModal({
       title: "Your Mint Status",
-      loading: true,
       content: <MintStatusModalContent />,
     });
   };

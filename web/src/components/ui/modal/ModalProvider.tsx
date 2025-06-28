@@ -6,7 +6,6 @@ import Modal from "./Modal";
 interface ModalOptions {
   title: string | null;
   content: ReactNode;
-  loading: boolean;
   disableClose?: boolean;
 }
 
@@ -17,7 +16,6 @@ interface ModalState extends ModalOptions {
 export interface ModalContextType {
   openModal: (options: ModalOptions) => void;
   closeModal: () => void;
-  endLoading: () => void;
 }
 
 export const ModalContext = createContext<ModalContextType | null>(null);
@@ -27,13 +25,12 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     isOpen: false,
     content: null,
     title: null,
-    loading: false,
     disableClose: false,
   });
 
   const openModal = useCallback(
-    ({ disableClose = false, loading = false, ...options }: ModalOptions) =>
-      setModal({ disableClose, loading, ...options, isOpen: true }),
+    ({ disableClose = false, ...options }: ModalOptions) =>
+      setModal({ disableClose, ...options, isOpen: true }),
     []
   );
 
@@ -42,23 +39,13 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     []
   );
 
-  const endLoading = useCallback(() => {
-    setModal((prev) => {
-      if (prev.loading) {
-        return { ...prev, loading: false };
-      }
-      return prev;
-    });
-  }, []);
-
   return (
-    <ModalContext.Provider value={{ openModal, closeModal, endLoading }}>
+    <ModalContext.Provider value={{ openModal, closeModal }}>
       {children}
       <Modal
         isOpen={modal.isOpen}
         onClose={closeModal}
         title={modal.title ?? ""}
-        loading={modal.loading}
         disableClose={modal.disableClose}
       >
         {modal?.content}
