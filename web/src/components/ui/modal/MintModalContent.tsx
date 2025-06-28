@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { MintStatus } from "@/types/mint";
 import { getMintStatus } from "@/lib/mint";
+import { useLoading } from "@/hooks/useLoading";
 
 const messages: Record<MintStatus, string> = {
   first:
@@ -9,20 +10,22 @@ const messages: Record<MintStatus, string> = {
     "You can see yout current NFT below. Remember you can remint it any time!",
 };
 
-const MintStatusModalContent = ({
+const MintModalContent = ({
   address,
   closeModal,
 }: {
   address: string | undefined;
   closeModal: () => void;
 }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { isLoaded, startLoading, endLoading } = useLoading();
+
   const [message, setMessage] = useState<string>("");
   const [picture, setPicture] = useState<string>("/NFTPlaceholder.png");
 
   useEffect(() => {
     (async () => {
       try {
+        startLoading();
         if (!address) {
           throw new Error("Missing wallet address");
         }
@@ -39,12 +42,12 @@ const MintStatusModalContent = ({
         }
         setPicture("/Error.png");
       } finally {
-        setIsLoading(false);
+        endLoading();
       }
     })();
   }, []);
 
-  if (isLoading) {
+  if (!isLoaded) {
     return <p>Loading...</p>;
   }
 
@@ -68,4 +71,4 @@ const MintStatusModalContent = ({
   );
 };
 
-export default MintStatusModalContent;
+export default MintModalContent;

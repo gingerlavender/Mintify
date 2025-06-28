@@ -3,20 +3,20 @@
 import { useSession } from "next-auth/react";
 import BaseButton from "@/components/ui/buttons/BaseButton";
 import { useAccount } from "wagmi";
-import { useMintStatusModal } from "@/hooks/modal/useMintStatusModal";
+import { useMintModal } from "@/hooks/modal/useMintModal";
 
 const MintButton = () => {
   const { data: session } = useSession();
   const { isConnected } = useAccount();
 
-  const { openMintStatusModal } = useMintStatusModal();
+  const { openMintModal } = useMintModal();
 
   return (
     <>
       <BaseButton
         disabled={!session || !isConnected}
         text="Let's go!"
-        onClick={openMintStatusModal}
+        onClick={openMintModal}
       />
     </>
   );
