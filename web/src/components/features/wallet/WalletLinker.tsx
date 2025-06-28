@@ -20,7 +20,7 @@ const WalletLinker = () => {
     closeErrorModal();
   }, [closeErrorModal]);
 
-  const handleUserConnect = useCallback(() => {
+  const handleUserConnect = () => {
     (async () => {
       const result = await apiRequest("api/user/wallet/link", {
         method: "POST",
@@ -33,7 +33,7 @@ const WalletLinker = () => {
         openErrorModal({ message: result.error });
       }
     })();
-  }, [address, openErrorModal]);
+  };
 
   useOnceWhen(
     handleUserConnect,
