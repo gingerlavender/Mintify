@@ -1,40 +1,13 @@
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { MintStatusResponse } from "@/types/mint";
+import { assertNoWalletMismatch, assertValidConnection } from "@/lib/wallet";
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
+  try {
+    const user = await assertValidConnection(req);
+    await assertNoWalletMismatch(req);
 
-  if (!session || !session.user.id) {
-    return NextResponse.json<MintStatusResponse>(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
-  const { walletAddress } = await req.json();
-
-  if (!walletAddress) {
-    return NextResponse.json<MintStatusResponse>(
-      { error: "Missing wallet address" },
-      { status: 400 }
-    );
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-  });
-
-  if (!user) {
-    return NextResponse.json<MintStatusResponse>(
-      { error: "User not found" },
-      { status: 404 }
-    );
-  }
-
-  if (user.wallet == walletAddress) {
     const nft = await prisma.personalNFT.findUnique({
       where: { userId: user.id },
     });
@@ -47,13 +20,10 @@ export async function POST(req: Request) {
       mintStatus: "repeated",
       tokenURI: nft.tokenURI,
     });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 403 }
+    );
   }
-
-  return NextResponse.json<MintStatusResponse>(
-    {
-      error:
-        "Wallet mismatch. Your wallet is not linked to your Spotify account",
-    },
-    { status: 403 }
-  );
 }
