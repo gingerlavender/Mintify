@@ -13,7 +13,7 @@ const ErrorModalContent: React.FC<ErrorModalContentProps> = ({
 }) => {
   return (
     <>
-      <p>Error occured: {error}</p>
+      <p>{error}</p>
       <div className="flex justify-center gap-4">
         <button className="modal-button" onClick={onClick}>
           {buttonText}

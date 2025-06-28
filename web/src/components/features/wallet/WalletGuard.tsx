@@ -2,7 +2,7 @@
 
 import { useErrorModal } from "@/hooks/modal/useErrorModal";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAccount, useDisconnect } from "wagmi";
 
 const WalletGuard = () => {
@@ -11,24 +11,40 @@ const WalletGuard = () => {
   const { disconnect } = useDisconnect();
   const { openErrorModal, closeErrorModal } = useErrorModal();
 
-  const handleUserReconnect = () => {
+  const mismatchRef = useRef<boolean>(false);
+
+  const handleUserDisconnect = () => {
     disconnect();
+    mismatchRef.current = false;
     closeErrorModal();
   };
 
   useEffect(() => {
-    if (
-      session?.user.wallet &&
-      address &&
-      isConnected &&
-      session.user.wallet.toLowerCase() != address.toLowerCase()
-    ) {
-      openErrorModal({
-        message:
-          "This address is not linked to your current Spotify account. Please reconnect with correct wallet.",
-        buttonText: "Disconnect",
-        onClick: handleUserReconnect,
-      });
+    const hasSession = !!session?.user.wallet;
+    const hasWallet = address && isConnected;
+    const walletsNotMatch =
+      session?.user.wallet?.toLowerCase() != address?.toLowerCase();
+
+    if (hasSession) {
+      if (hasWallet) {
+        if (walletsNotMatch) {
+          if (!mismatchRef.current) {
+            openErrorModal({
+              message:
+                "This address is not linked to your current Spotify account. Please reconnect with correct wallet.",
+              buttonText: "Disconnect",
+              onClick: handleUserDisconnect,
+            });
+            mismatchRef.current = true;
+          }
+        } else if (mismatchRef.current) {
+          mismatchRef.current = false;
+          closeErrorModal();
+        }
+      } else {
+        mismatchRef.current = false;
+        closeErrorModal();
+      }
     }
   }, [session, address, isConnected]);
 

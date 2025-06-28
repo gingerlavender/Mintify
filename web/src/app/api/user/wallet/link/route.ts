@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { assertValidConnection } from "@/lib/wallet";
+import { assertValidConnection } from "@/lib/validation";
 
 const WalletLinkRequestSchema = z.object({
   walletAddress: z

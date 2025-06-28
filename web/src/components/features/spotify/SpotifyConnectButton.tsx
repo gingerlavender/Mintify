@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn, signOut, useSession } from "next-auth/react";
-import { useAccount, useSwitchAccount } from "wagmi";
+import { useAccount } from "wagmi";
 import ButtonWithAvatar from "@/components/ui/buttons/ButtonWithAvatar";
 import { useEffect } from "react";
 import { useErrorModal } from "@/hooks/modal/useErrorModal";

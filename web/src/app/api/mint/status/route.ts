@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { assertNoWalletMismatch, assertValidConnection } from "@/lib/wallet";
+import {
+  assertNoWalletMismatch,
+  assertValidConnection,
+} from "@/lib/validation";
 import { MintStatusResult } from "@/types/mint";
 
 const MintStatusRequestSchema = z.object({
