@@ -13,10 +13,10 @@ export default function Home() {
   return (
     <SessionProvider>
       <Web3Provider>
-        <WalletGuard />
         <Soundwave />
         <Header />
         <ModalProvider>
+          <WalletGuard />
           <Menu />
         </ModalProvider>
       </Web3Provider>
