@@ -3,8 +3,9 @@
 import { useErrorModal } from "@/hooks/modal/useErrorModal";
 import { apiRequest } from "@/lib/api";
 import { useSession } from "next-auth/react";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useAccount, useDisconnect } from "wagmi";
+import { useOnceWhen } from "@/hooks/useOnceWhen";
 
 const WalletLinker = () => {
   const { data: session } = useSession();
@@ -19,26 +20,29 @@ const WalletLinker = () => {
     closeErrorModal();
   };
 
+  const handleUserConnect = useCallback(() => {
+    (async () => {
+      const result = await apiRequest("api/user/wallet/link", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          walletAddress: address,
+        }),
+      });
+      if (!result.success) {
+        openErrorModal({ message: result.error });
+      }
+    })();
+  }, [session, address, isConnected]);
+
   const handleUserDisconnect = () => {
     disconnect();
   };
 
-  useEffect(() => {
-    if (session && isConnected && address && !session.user.wallet) {
-      (async () => {
-        const result = await apiRequest("api/user/wallet/link", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            walletAddress: address,
-          }),
-        });
-        if (!result.success) {
-          openErrorModal({ message: result.error });
-        }
-      })();
-    }
-  }, [session, isConnected, address]);
+  useOnceWhen(
+    handleUserConnect,
+    !!session && isConnected && !!address && !session.user.wallet
+  );
 
   useEffect(() => {
     const hasSessionWithStoredWallet = !!session?.user.wallet;
