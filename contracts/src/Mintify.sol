@@ -26,7 +26,7 @@ contract Mintify is Ownable, ERC721, ERC721URIStorage {
     error AlreadyMinted();
     error UpdateUnavialable();
     error NotATokenOwner();
-    error InsufficientFunds();
+    error IncorrectValue();
     error WithdrawFailed();
     error ZeroAddressTrustedSigner();
 
@@ -37,7 +37,7 @@ contract Mintify is Ownable, ERC721, ERC721URIStorage {
     event URIUpdated(uint indexed tokenId, string _newTokenURI);
 
     modifier costs(uint _cost) {
-        require(msg.value >= _cost, InsufficientFunds());
+        require(msg.value == _cost, IncorrectValue());
         _;
     }
 

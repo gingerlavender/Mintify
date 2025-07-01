@@ -6,6 +6,10 @@ import {console} from "forge-std/console.sol";
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {IERC165} from "@openzeppelin/contracts/interfaces/IERC165.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+
 import {Mintify} from "src/Mintify.sol";
 
 contract Dummy {}
@@ -87,7 +91,7 @@ contract MintifyTest is Test {
         uint price = mintify.getPrice(receiver);
 
         hoax(receiver);
-        vm.expectRevert(Mintify.InsufficientFunds.selector);
+        vm.expectRevert(Mintify.IncorrectValue.selector);
         mintify.safeMintWithSignature{value: price - 1}(tokenURI, v, r, s);
     }
 
@@ -117,10 +121,13 @@ contract MintifyTest is Test {
             1
         );
 
-        price = mintify.getPrice(receiver);
-
         vm.expectRevert(Mintify.AlreadyMinted.selector);
-        mintify.safeMintWithSignature{value: price}(uriForSecondMint, v, r, s);
+        mintify.safeMintWithSignature{value: costPerUpdate}(
+            uriForSecondMint,
+            v,
+            r,
+            s
+        );
     }
 
     function test_safeMint_RevertsIf_TryingToReplay() external {
@@ -422,6 +429,10 @@ contract MintifyTest is Test {
             address anotherTrustedSigner,
             uint anotherTrustedSignerPrivKey
         ) = makeAddrAndKey("anotherTrustedSigner");
+
+        vm.expectEmit(true, true, true, true);
+        emit TrustedSignerChanged(trustedSigner, anotherTrustedSigner);
+
         mintify.changeTrustedSigner(anotherTrustedSigner);
 
         address receiver = receivers[0];
@@ -443,6 +454,38 @@ contract MintifyTest is Test {
         hoax(receiver);
         mintify.safeMintWithSignature{value: price}(tokenURI, v, r, s);
         assertEq(mintify.balanceOf(receiver), 1);
+    }
+
+    function test_changeTrustedSigner_RevertsIf_TryingToChangeToZeroAddress()
+        external
+    {
+        vm.expectRevert(Mintify.ZeroAddressTrustedSigner.selector);
+        mintify.changeTrustedSigner(address(0));
+    }
+
+    function test_changeCostPerUpdate_AllowsToChangeCost() external {
+        uint newCostPerUpdate = costPerUpdate * 2;
+
+        address user = receivers[0];
+
+        vm.expectEmit(true, true, true, true);
+        emit CostPerUpdateChanged(costPerUpdate, newCostPerUpdate);
+
+        mintify.changeCostPerUpdate(newCostPerUpdate);
+
+        assertEq(mintify.costPerUpdate(), newCostPerUpdate);
+        assertEq(mintify.getPrice(user), newCostPerUpdate);
+    }
+
+    function test_supportsInterface_SupportsAllInterfaces() external view {
+        bytes4 ERC4906InterfaceId = bytes4(0x49064906);
+
+        assertTrue(mintify.supportsInterface(type(IERC165).interfaceId));
+        assertTrue(mintify.supportsInterface(type(IERC721).interfaceId));
+        assertTrue(
+            mintify.supportsInterface(type(IERC721Metadata).interfaceId)
+        );
+        assertTrue(mintify.supportsInterface(ERC4906InterfaceId));
     }
 
     function _createSignatureForMint(
