@@ -16,8 +16,8 @@ cast --version
 echo "Installing OpenZeppelin contracts..."
 cd ../contracts
 
-forge install OpenZeppelin/openzeppelin-contracts --no-git
-
+forge install OpenZeppelin/openzeppelin-contracts-upgradeable --no-git
+forge install OpenZeppelin/openzeppelin-foundry-upgrades --no-git
 cd ../web
 
 echo "Generating Prisma client..."
