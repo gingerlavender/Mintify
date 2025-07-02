@@ -1,20 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-import {Nonces} from "@openzeppelin/contracts/utils/Nonces.sol";
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
-contract Mintify is Ownable, ERC721, ERC721URIStorage {
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {ERC721URIStorageUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+
+contract Mintify is
+    Initializable,
+    ERC721Upgradeable,
+    ERC721URIStorageUpgradeable,
+    OwnableUpgradeable,
+    UUPSUpgradeable
+{
     string private constant PINATA_GATEWAY =
         "https://crimson-bitter-horse-871.mypinata.cloud/";
 
     address private _trustedSigner;
 
-    uint private _currentTokenId = 1;
+    uint private _currentTokenId;
 
     mapping(uint tokenId => bool) private _wasTransferred;
 
@@ -41,10 +49,22 @@ contract Mintify is Ownable, ERC721, ERC721URIStorage {
         _;
     }
 
-    constructor(
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(
+        address _initialOwner,
         address trustedSigner_,
         uint _costPerUpdate
-    ) Ownable(msg.sender) ERC721("Mintify", "MFY") {
+    ) public initializer {
+        __ERC721_init("Mintify", "MFY");
+        __ERC721URIStorage_init();
+        __Ownable_init(_initialOwner);
+        __UUPSUpgradeable_init();
+
+        _currentTokenId = 1;
         _trustedSigner = trustedSigner_;
         costPerUpdate = _costPerUpdate;
     }
@@ -113,15 +133,29 @@ contract Mintify is Ownable, ERC721, ERC721URIStorage {
 
     function tokenURI(
         uint tokenId
-    ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+    )
+        public
+        view
+        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+        returns (string memory)
+    {
         return super.tokenURI(tokenId);
     }
 
     function supportsInterface(
         bytes4 interfaceId
-    ) public view override(ERC721, ERC721URIStorage) returns (bool) {
+    )
+        public
+        view
+        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+        returns (bool)
+    {
         return super.supportsInterface(interfaceId);
     }
+
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyOwner {}
 
     function _update(
         address _to,

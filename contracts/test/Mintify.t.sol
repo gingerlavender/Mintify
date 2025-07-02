@@ -4,17 +4,21 @@ pragma solidity ^0.8.28;
 import {Test} from "forge-std/Test.sol";
 import {console} from "forge-std/console.sol";
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {IERC165} from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {Mintify} from "src/Mintify.sol";
 
 contract Dummy {}
 
 contract MintifyTest is Test {
+    bytes32 DEPLOYMENT_SALT = keccak256(abi.encodePacked("Salt_N_No_Pepa"));
+
     uint constant CHAIN_ID = 31337;
     string constant BASE_URI =
         "https://crimson-bitter-horse-871.mypinata.cloud/";
@@ -22,6 +26,7 @@ contract MintifyTest is Test {
     Mintify mintify;
     address trustedSigner;
     uint256 trustedSignerPrivKey;
+    address initialOwner = address(this);
     uint costPerUpdate = 0.01 ether;
 
     string[] sampleTokenURIs = [
@@ -44,10 +49,23 @@ contract MintifyTest is Test {
 
     function setUp() external {
         (trustedSigner, trustedSignerPrivKey) = makeAddrAndKey("trustedSigner");
-        mintify = new Mintify(trustedSigner, costPerUpdate);
+
+        address implementation = address(new Mintify{salt: DEPLOYMENT_SALT}());
+
+        bytes memory initData = abi.encodeCall(
+            Mintify.initialize,
+            (initialOwner, trustedSigner, costPerUpdate)
+        );
+
+        ERC1967Proxy proxy = new ERC1967Proxy{salt: DEPLOYMENT_SALT}(
+            implementation,
+            initData
+        );
+
+        mintify = Mintify(address(proxy));
     }
 
-    function test_safeMint_AllowsMint() external {
+    function test_safeMint_AllowsToMint() external {
         address receiver = receivers[0];
 
         string memory tokenURI = sampleTokenURIs[0];
@@ -388,7 +406,7 @@ contract MintifyTest is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
+                OwnableUpgradeable.OwnableUnauthorizedAccount.selector,
                 receiver
             )
         );
