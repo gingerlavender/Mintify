@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { MintStatus, MintStatusResult } from "@/types/mint";
 import { useLoading } from "@/hooks/useLoading";
 import { apiRequest } from "@/lib/api";
+import { useAccount, useChainId } from "wagmi";
 
 const messages: Record<MintStatus, string> = {
   first:
@@ -13,14 +14,13 @@ const messages: Record<MintStatus, string> = {
 };
 
 interface MintModalContentProps {
-  address: string | undefined;
   closeModal: () => void;
 }
 
-const MintModalContent: React.FC<MintModalContentProps> = ({
-  address,
-  closeModal,
-}) => {
+const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
+  const { address } = useAccount();
+  const chainId = useChainId();
+
   const { isLoading, startLoading, endLoading } = useLoading(true);
 
   const [message, setMessage] = useState<string>("");
@@ -40,7 +40,7 @@ const MintModalContent: React.FC<MintModalContentProps> = ({
       const result = await apiRequest<MintStatusResult>("api/mint/status", {
         headers: { "content-type": "application/json" },
         method: "POST",
-        body: JSON.stringify({ walletAddress: address }),
+        body: JSON.stringify({ walletAddress: address, chainId }),
       });
 
       if (result.success) {
@@ -55,7 +55,7 @@ const MintModalContent: React.FC<MintModalContentProps> = ({
 
       endLoading();
     })();
-  }, [address, startLoading, endLoading]);
+  }, [address, chainId, startLoading, endLoading]);
 
   if (isLoading) {
     return <p>Loading...</p>;
