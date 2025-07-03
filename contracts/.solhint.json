@@ -3,6 +3,5 @@
   "rules": {
     "func-visibility": ["warn", { "ignoreConstructors": true }],
     "import-path-check": "off"
-  },
-  "excludedFiles": ["test/**/*.sol", "script/**/*.sol"]
+  }
 }
