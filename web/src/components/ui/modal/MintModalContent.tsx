@@ -24,7 +24,7 @@ const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
   const { isLoading, startLoading, endLoading } = useLoading(true);
 
   const [message, setMessage] = useState<string | undefined>();
-  const [picture, setPicture] = useState<string>("./NFTPlaceholder.png");
+  const [picture, setPicture] = useState<string>("NFTPlaceholder.png");
   const [price, setPrice] = useState<number | undefined>();
   const [mintIsForbidden, setMintIsForbidden] = useState<boolean>(false);
 
@@ -55,7 +55,7 @@ const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
         }
       } else {
         setMessage(result.error);
-        setPicture("./Error.png");
+        setPicture("Error.png");
       }
 
       endLoading();
@@ -69,7 +69,7 @@ const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
   return (
     <>
       <p>{message}</p>
-      {price && <p>Your current mint price (without fees): {price}ETH</p>}
+      {price && <p>Your current mint price (without fees): {price} ETH</p>}
       <Image
         className="w-[50vw] md:w-[20vw] rounded-2xl"
         src={picture}
