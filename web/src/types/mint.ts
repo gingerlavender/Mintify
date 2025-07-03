@@ -7,12 +7,12 @@ export enum MintStatus {
 export type MintStatusResult =
   | {
       mintStatus: MintStatus.NotMinted;
-      nextPrice: bigint;
+      nextPrice: number;
     }
   | {
       mintStatus: MintStatus.Minted;
       tokenURI: string;
-      nextPrice: bigint;
+      nextPrice: number;
     }
   | {
       mintStatus: MintStatus.TokenTransferred;

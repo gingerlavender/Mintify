@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { isAddress } from "viem";
+import { formatEther, isAddress } from "viem";
 
 import { assertValidConnection } from "@/lib/validation";
 import { MintStatusResult } from "@/types/mint";
@@ -47,12 +47,16 @@ export async function POST(req: Request) {
       args: [user.wallet],
     });
 
-    const nextPrice = await publicClient.readContract({
-      address: mintifyAddress,
-      abi: mintifyAbi,
-      functionName: "getPrice",
-      args: [user.wallet],
-    });
+    const nextPrice = Number(
+      formatEther(
+        await publicClient.readContract({
+          address: mintifyAddress,
+          abi: mintifyAbi,
+          functionName: "getPrice",
+          args: [user.wallet],
+        })
+      )
+    );
 
     const nft = await prisma.personalNFT.findUnique({
       where: { userId: user.id },

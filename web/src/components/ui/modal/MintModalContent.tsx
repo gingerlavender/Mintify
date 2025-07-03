@@ -4,7 +4,6 @@ import { MintStatus, MintStatusResult } from "@/types/mint";
 import { useLoading } from "@/hooks/useLoading";
 import { apiRequest } from "@/lib/api";
 import { useChainId } from "wagmi";
-import { formatEther } from "viem";
 
 const messages: Record<MintStatus, string> = {
   [MintStatus.NotMinted]:
@@ -25,7 +24,7 @@ const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
   const { isLoading, startLoading, endLoading } = useLoading(true);
 
   const [message, setMessage] = useState<string | undefined>();
-  const [picture, setPicture] = useState<string>("/NFTPlaceholder.png");
+  const [picture, setPicture] = useState<string>("./NFTPlaceholder.png");
   const [price, setPrice] = useState<number | undefined>();
   const [mintIsForbidden, setMintIsForbidden] = useState<boolean>(false);
 
@@ -43,7 +42,7 @@ const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
         setMessage(messages[result.data.mintStatus]);
 
         if (result.data.mintStatus != MintStatus.TokenTransferred) {
-          setPrice(Number(formatEther(result.data.nextPrice)));
+          setPrice(result.data.nextPrice);
         } else {
           setMintIsForbidden(true);
         }
