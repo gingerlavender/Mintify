@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { MintStatus, MintStatusResult } from "@/types/mint";
 import { useLoading } from "@/hooks/useLoading";
 import { apiRequest } from "@/lib/api";
@@ -64,7 +65,7 @@ const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
   return (
     <>
       <p>{message}</p>
-      <img
+      <Image
         className="w-[50vw] md:w-[20vw] rounded-2xl"
         src={picture}
         alt="NFT Preview"
