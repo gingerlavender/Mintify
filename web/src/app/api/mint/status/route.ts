@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     const nextPrice = await publicClient.readContract({
       address: mintifyAddress,
       abi: mintifyAbi,
-      functionName: "getUpdatePrice",
+      functionName: "getPrice",
       args: [user.wallet],
     });
 
