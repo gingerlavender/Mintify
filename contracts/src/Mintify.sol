@@ -24,7 +24,7 @@ contract Mintify is
 
     uint256 private _currentTokenId;
 
-    mapping(uint256 tokenId => bool) private _wasTransferred;
+    mapping(uint256 tokenId => address) public firstOwner;
 
     mapping(address user => uint256) public tokenUriUpdates;
 
@@ -86,6 +86,7 @@ contract Mintify is
         _safeMint(msg.sender, _currentTokenId);
         _setTokenURI(_currentTokenId, _tokenURI);
         tokenUriUpdates[msg.sender]++;
+        firstOwner[_currentTokenId] = msg.sender;
 
         emit Minted(msg.sender, _currentTokenId++, _tokenURI);
     }
@@ -98,7 +99,7 @@ contract Mintify is
         bytes32 s
     ) external payable costs(getPrice(msg.sender)) {
         require(msg.sender == ownerOf(_tokenId), NotATokenOwner());
-        require(!_wasTransferred[_tokenId], UpdateUnavialable());
+        require(msg.sender == firstOwner[_tokenId], UpdateUnavialable());
         _checkIsSignedUpdate(_tokenId, _newTokenURI, v, r, s);
 
         _setTokenURI(_tokenId, _newTokenURI);
@@ -161,19 +162,6 @@ contract Mintify is
     function _authorizeUpgrade(
         address newImplementation
     ) internal override onlyOwner {} // solhint-disable-line no-empty-blocks
-
-    function _update(
-        address _to,
-        uint256 _tokenId,
-        address _auth
-    ) internal override returns (address) {
-        address from = super._update(_to, _tokenId, _auth);
-        if (_to != address(0) && from != address(0)) {
-            _wasTransferred[_tokenId] = true;
-        }
-
-        return from;
-    }
 
     function _baseURI() internal pure override returns (string memory) {
         return PINATA_GATEWAY;

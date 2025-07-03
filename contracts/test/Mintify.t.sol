@@ -27,7 +27,7 @@ contract MintifyTest is Test {
     address trustedSigner;
     uint256 trustedSignerPrivKey;
     address initialOwner = address(this);
-    uint256 costPerUpdate = 0.01 ether;
+    uint256 costPerUpdate = 0.001 ether;
 
     string[] sampleTokenURIs = [
         "someTokenURI",
@@ -219,6 +219,59 @@ contract MintifyTest is Test {
             string(abi.encodePacked(BASE_URI, updatedTokenURI))
         );
         assertEq(mintify.tokenUriUpdates(receiver), 2);
+    }
+
+    function test_updateTokenURIWithSignature_AllowsToUpdateAfterDoubleTransfer()
+        external
+    {
+        address originalMinter = receivers[0];
+        address newOwner = receivers[1];
+
+        string memory tokenURI = sampleTokenURIs[0];
+        string memory updatedTokenURI = sampleTokenURIs[1];
+
+        (uint8 v, bytes32 r, bytes32 s) = _createSignatureForMint(
+            trustedSignerPrivKey,
+            originalMinter,
+            tokenURI,
+            0
+        );
+
+        uint256 price = mintify.getPrice(originalMinter);
+
+        startHoax(originalMinter);
+
+        mintify.safeMintWithSignature{value: price}(tokenURI, v, r, s);
+        mintify.safeTransferFrom(originalMinter, newOwner, 1);
+
+        vm.startPrank(newOwner);
+
+        mintify.safeTransferFrom(newOwner, originalMinter, 1);
+
+        vm.stopPrank();
+
+        (v, r, s) = _createSignatureForURIUpdate(
+            trustedSignerPrivKey,
+            1,
+            updatedTokenURI,
+            1
+        );
+
+        price = mintify.getPrice(originalMinter);
+
+        hoax(originalMinter);
+        mintify.updateTokenURIWithSignature{value: price}(
+            1,
+            updatedTokenURI,
+            v,
+            r,
+            s
+        );
+
+        assertEq(
+            mintify.tokenURI(1),
+            string(abi.encodePacked(BASE_URI, updatedTokenURI))
+        );
     }
 
     function test_updateTokenURIWithSignature_RevertsIf_TryingToReplay()
