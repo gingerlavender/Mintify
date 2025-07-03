@@ -3,10 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAddress } from "viem";
 
-import {
-  assertNoWalletMismatch,
-  assertValidConnection,
-} from "@/lib/validation";
+import { assertValidConnection } from "@/lib/validation";
 import { MintStatusResult } from "@/types/mint";
 
 import { publicClientsByChainId } from "@/lib/publicClients";
@@ -14,9 +11,6 @@ import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 import { MintStatus } from "@/types/mint";
 
 const MintStatusRequestSchema = z.object({
-  walletAddress: z
-    .string()
-    .refine((val) => isAddress(val), "Invalid ETH address format"),
   chainId: z.number().refine((id) => {
     return id in publicClientsByChainId;
   }, "Invalid chain id"),
@@ -25,10 +19,13 @@ const MintStatusRequestSchema = z.object({
 export async function POST(req: Request) {
   try {
     const rawBody = await req.json();
-    const { walletAddress, chainId } = MintStatusRequestSchema.parse(rawBody);
+    const { chainId } = MintStatusRequestSchema.parse(rawBody);
 
     const user = await assertValidConnection();
-    await assertNoWalletMismatch(user, walletAddress);
+
+    if (!user.wallet || !isAddress(user.wallet)) {
+      throw new Error("Missing or incorrect wallet address");
+    }
 
     const publicClient =
       publicClientsByChainId[chainId as keyof typeof publicClientsByChainId];
@@ -47,14 +44,14 @@ export async function POST(req: Request) {
       address: mintifyAddress,
       abi: mintifyAbi,
       functionName: "tokenUriUpdates",
-      args: [walletAddress],
+      args: [user.wallet],
     });
 
     const nextPrice = await publicClient.readContract({
       address: mintifyAddress,
       abi: mintifyAbi,
       functionName: "getUpdatePrice",
-      args: [walletAddress],
+      args: [user.wallet],
     });
 
     const nft = await prisma.personalNFT.findUnique({
@@ -88,7 +85,7 @@ export async function POST(req: Request) {
       args: [BigInt(nft.tokenId)],
     });
 
-    if (currentOwner != walletAddress) {
+    if (currentOwner != user.wallet) {
       return NextResponse.json<MintStatusResult>({
         mintStatus: MintStatus.TokenTransferred,
         tokenURI,

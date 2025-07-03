@@ -3,7 +3,7 @@ import Image from "next/image";
 import { MintStatus, MintStatusResult } from "@/types/mint";
 import { useLoading } from "@/hooks/useLoading";
 import { apiRequest } from "@/lib/api";
-import { useAccount, useChainId } from "wagmi";
+import { useChainId } from "wagmi";
 import { formatEther } from "viem";
 
 const messages: Record<MintStatus, string> = {
@@ -20,7 +20,6 @@ interface MintModalContentProps {
 }
 
 const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
-  const { address } = useAccount();
   const chainId = useChainId();
 
   const { isLoading, startLoading, endLoading } = useLoading(true);
@@ -34,17 +33,10 @@ const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
     (async () => {
       startLoading();
 
-      if (!address) {
-        setMessage("Missing wallet address");
-        setPicture("./Error.png");
-        endLoading();
-        return;
-      }
-
       const result = await apiRequest<MintStatusResult>("api/mint/status", {
         headers: { "content-type": "application/json" },
         method: "POST",
-        body: JSON.stringify({ walletAddress: address, chainId }),
+        body: JSON.stringify({ chainId }),
       });
 
       if (result.success) {
@@ -69,7 +61,7 @@ const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
 
       endLoading();
     })();
-  }, [address, chainId, startLoading, endLoading]);
+  }, [chainId, startLoading, endLoading]);
 
   if (isLoading) {
     return <p>Loading...</p>;
