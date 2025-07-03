@@ -1,5 +1,3 @@
-"use client";
-
 import Task from "../ui/Task";
 
 const Menu = () => {

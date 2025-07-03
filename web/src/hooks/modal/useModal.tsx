@@ -3,7 +3,8 @@
 import {
   ModalContext,
   ModalContextType,
-} from "@/components/ui/modal/ModalProvider";
+} from "@/components/providers/ModalProvider";
+
 import { useContext } from "react";
 
 export const useModal = (): ModalContextType => {
