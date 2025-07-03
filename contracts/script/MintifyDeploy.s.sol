@@ -17,7 +17,7 @@ contract MintifyDeployScript is Script {
     address constant TRUSTED_SIGNER =
         0xf737D6A273F2E14b4c65d45E0878C4dFdd6D44fb;
 
-    uint constant COST_PER_UPDATE = 0.01 ether;
+    uint256 constant COST_PER_UPDATE = 0.01 ether;
 
     bytes constant INIT_DATA =
         abi.encodeCall(

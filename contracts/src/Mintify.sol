@@ -22,13 +22,13 @@ contract Mintify is
 
     address private _trustedSigner;
 
-    uint private _currentTokenId;
+    uint256 private _currentTokenId;
 
-    mapping(uint tokenId => bool) private _wasTransferred;
+    mapping(uint256 tokenId => bool) private _wasTransferred;
 
-    mapping(address user => uint) public tokenUriUpdates;
+    mapping(address user => uint256) public tokenUriUpdates;
 
-    uint public costPerUpdate;
+    uint256 public costPerUpdate;
 
     error InvalidSigner();
     error AlreadyMinted();
@@ -38,13 +38,18 @@ contract Mintify is
     error WithdrawFailed();
     error ZeroAddressTrustedSigner();
 
-    event MoneyWithdrawn(address indexed _owner, uint _amount);
-    event TrustedSignerChanged(address indexed _initial, address indexed _new);
-    event CostPerUpdateChanged(uint _initial, uint _new);
-    event Minted(address indexed _to, uint indexed _tokenId, string _tokenURI);
-    event URIUpdated(uint indexed tokenId, string _newTokenURI);
+    event MoneyWithdrawn(address indexed _owner, uint256);
 
-    modifier costs(uint _cost) {
+    event TrustedSignerChanged(address indexed _initial, address indexed _new);
+    event CostPerUpdateChanged(uint256 _initial, uint256 _new);
+    event Minted(
+        address indexed _to,
+        uint256 indexed _tokenId,
+        string _tokenURI
+    );
+    event URIUpdated(uint256 indexed tokenId, string _newTokenURI);
+
+    modifier costs(uint256 _cost) {
         require(msg.value == _cost, IncorrectValue());
         _;
     }
@@ -57,7 +62,7 @@ contract Mintify is
     function initialize(
         address _initialOwner,
         address trustedSigner_,
-        uint _costPerUpdate
+        uint256 _costPerUpdate
     ) public initializer {
         __ERC721_init("Mintify", "MFY");
         __ERC721URIStorage_init();
@@ -86,7 +91,7 @@ contract Mintify is
     }
 
     function updateTokenURIWithSignature(
-        uint _tokenId,
+        uint256 _tokenId,
         string calldata _newTokenURI,
         uint8 v,
         bytes32 r,
@@ -103,7 +108,7 @@ contract Mintify is
     }
 
     function withdrawFunds() external onlyOwner {
-        uint balance = address(this).balance;
+        uint256 balance = address(this).balance;
         (bool success, ) = owner().call{value: balance}("");
 
         require(success, WithdrawFailed());
@@ -120,19 +125,19 @@ contract Mintify is
         emit TrustedSignerChanged(initialTrustedSigner, _newTrustedSigner);
     }
 
-    function changeCostPerUpdate(uint _newCostPerUpdate) external onlyOwner {
-        uint initialCostPerUpdate = costPerUpdate;
+    function changeCostPerUpdate(uint256 _newCostPerUpdate) external onlyOwner {
+        uint256 initialCostPerUpdate = costPerUpdate;
         costPerUpdate = _newCostPerUpdate;
 
         emit CostPerUpdateChanged(initialCostPerUpdate, _newCostPerUpdate);
     }
 
-    function getPrice(address _user) public view returns (uint) {
+    function getPrice(address _user) public view returns (uint256) {
         return (tokenUriUpdates[_user] + 1) * costPerUpdate;
     }
 
     function tokenURI(
-        uint tokenId
+        uint256 tokenId
     )
         public
         view
@@ -155,11 +160,11 @@ contract Mintify is
 
     function _authorizeUpgrade(
         address newImplementation
-    ) internal override onlyOwner {}
+    ) internal override onlyOwner {} // solhint-disable-line no-empty-blocks
 
     function _update(
         address _to,
-        uint _tokenId,
+        uint256 _tokenId,
         address _auth
     ) internal override returns (address) {
         address from = super._update(_to, _tokenId, _auth);
@@ -194,7 +199,7 @@ contract Mintify is
     }
 
     function _checkIsSignedUpdate(
-        uint _tokenId,
+        uint256 _tokenId,
         string calldata _tokenURI,
         uint8 v,
         bytes32 r,

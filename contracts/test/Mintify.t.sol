@@ -2,7 +2,6 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
-import {console} from "forge-std/console.sol";
 
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {IERC165} from "@openzeppelin/contracts/interfaces/IERC165.sol";
@@ -17,9 +16,10 @@ import {Mintify} from "src/Mintify.sol";
 contract Dummy {}
 
 contract MintifyTest is Test {
-    bytes32 DEPLOYMENT_SALT = keccak256(abi.encodePacked("Salt_N_No_Pepa"));
+    bytes32 constant DEPLOYMENT_SALT =
+        keccak256(abi.encodePacked("Salt_N_No_Pepa"));
 
-    uint constant CHAIN_ID = 31337;
+    uint256 constant CHAIN_ID = 31337;
     string constant BASE_URI =
         "https://crimson-bitter-horse-871.mypinata.cloud/";
 
@@ -27,7 +27,7 @@ contract MintifyTest is Test {
     address trustedSigner;
     uint256 trustedSignerPrivKey;
     address initialOwner = address(this);
-    uint costPerUpdate = 0.01 ether;
+    uint256 costPerUpdate = 0.01 ether;
 
     string[] sampleTokenURIs = [
         "someTokenURI",
@@ -39,11 +39,15 @@ contract MintifyTest is Test {
         makeAddr("secondReceiver")
     ];
 
-    event MoneyWithdrawn(address indexed _owner, uint _amount);
+    event MoneyWithdrawn(address indexed _owner, uint256 _amount);
     event TrustedSignerChanged(address indexed _initial, address indexed _new);
-    event CostPerUpdateChanged(uint _initial, uint _new);
-    event Minted(address indexed _to, uint indexed _tokenId, string _tokenURI);
-    event URIUpdated(uint indexed tokenId, string _newTokenURI);
+    event CostPerUpdateChanged(uint256 _initial, uint256 _new);
+    event Minted(
+        address indexed _to,
+        uint256 indexed _tokenId,
+        string _tokenURI
+    );
+    event URIUpdated(uint256 indexed tokenId, string _newTokenURI);
 
     receive() external payable {}
 
@@ -77,7 +81,7 @@ contract MintifyTest is Test {
             0
         );
 
-        uint price = mintify.getPrice(receiver);
+        uint256 price = mintify.getPrice(receiver);
 
         hoax(receiver);
 
@@ -106,7 +110,7 @@ contract MintifyTest is Test {
             0
         );
 
-        uint price = mintify.getPrice(receiver);
+        uint256 price = mintify.getPrice(receiver);
 
         hoax(receiver);
         vm.expectRevert(Mintify.IncorrectValue.selector);
@@ -126,7 +130,7 @@ contract MintifyTest is Test {
             0
         );
 
-        uint price = mintify.getPrice(receiver);
+        uint256 price = mintify.getPrice(receiver);
 
         startHoax(receiver);
 
@@ -161,7 +165,7 @@ contract MintifyTest is Test {
             0
         );
 
-        uint price = mintify.getPrice(receiver);
+        uint256 price = mintify.getPrice(receiver);
 
         startHoax(receiver);
 
@@ -184,7 +188,7 @@ contract MintifyTest is Test {
             0
         );
 
-        uint price = mintify.getPrice(receiver);
+        uint256 price = mintify.getPrice(receiver);
 
         startHoax(receiver);
 
@@ -233,7 +237,7 @@ contract MintifyTest is Test {
             0
         );
 
-        uint price = mintify.getPrice(receiver);
+        uint256 price = mintify.getPrice(receiver);
 
         startHoax(receiver);
 
@@ -284,7 +288,7 @@ contract MintifyTest is Test {
             0
         );
 
-        uint price = mintify.getPrice(originalMinter);
+        uint256 price = mintify.getPrice(originalMinter);
 
         startHoax(originalMinter);
 
@@ -368,19 +372,19 @@ contract MintifyTest is Test {
             0
         );
 
-        uint price = mintify.getPrice(receiver);
+        uint256 price = mintify.getPrice(receiver);
 
         hoax(receiver);
         mintify.safeMintWithSignature{value: price}(tokenURI, v, r, s);
 
-        uint balanceBeforeWithdraw = address(this).balance;
+        uint256 balanceBeforeWithdraw = address(this).balance;
 
         vm.expectEmit(true, true, true, true);
         emit MoneyWithdrawn(address(this), price);
 
         mintify.withdrawFunds();
 
-        uint balanceAfterWithdraw = address(this).balance;
+        uint256 balanceAfterWithdraw = address(this).balance;
 
         assertEq(balanceAfterWithdraw, balanceBeforeWithdraw + price);
     }
@@ -399,7 +403,7 @@ contract MintifyTest is Test {
             0
         );
 
-        uint price = mintify.getPrice(receiver);
+        uint256 price = mintify.getPrice(receiver);
 
         startHoax(receiver);
         mintify.safeMintWithSignature{value: price}(tokenURI, v, r, s);
@@ -427,7 +431,7 @@ contract MintifyTest is Test {
             0
         );
 
-        uint price = mintify.getPrice(receiver);
+        uint256 price = mintify.getPrice(receiver);
 
         Dummy dummy = new Dummy();
         mintify.transferOwnership(address(dummy));
@@ -445,7 +449,7 @@ contract MintifyTest is Test {
     {
         (
             address anotherTrustedSigner,
-            uint anotherTrustedSignerPrivKey
+            uint256 anotherTrustedSignerPrivKey
         ) = makeAddrAndKey("anotherTrustedSigner");
 
         vm.expectEmit(true, true, true, true);
@@ -464,7 +468,7 @@ contract MintifyTest is Test {
             0
         );
 
-        uint price = mintify.getPrice(receiver);
+        uint256 price = mintify.getPrice(receiver);
 
         vm.expectEmit(true, true, true, true);
         emit Minted(receiver, 1, tokenURI);
@@ -482,7 +486,7 @@ contract MintifyTest is Test {
     }
 
     function test_changeCostPerUpdate_AllowsToChangeCost() external {
-        uint newCostPerUpdate = costPerUpdate * 2;
+        uint256 newCostPerUpdate = costPerUpdate * 2;
 
         address user = receivers[0];
 
@@ -507,10 +511,10 @@ contract MintifyTest is Test {
     }
 
     function _createSignatureForMint(
-        uint _signerPrivKey,
+        uint256 _signerPrivKey,
         address _receiver,
         string memory _tokenURI,
-        uint _nonce
+        uint256 _nonce
     ) private pure returns (uint8 v, bytes32 r, bytes32 s) {
         bytes32 messageHash = keccak256(
             abi.encodePacked(_receiver, _tokenURI, _nonce, CHAIN_ID)
@@ -519,10 +523,10 @@ contract MintifyTest is Test {
     }
 
     function _createSignatureForURIUpdate(
-        uint _signerPrivKey,
-        uint _tokenId,
+        uint256 _signerPrivKey,
+        uint256 _tokenId,
         string memory _newTokenURI,
-        uint _nonce
+        uint256 _nonce
     ) private pure returns (uint8 v, bytes32 r, bytes32 s) {
         bytes32 messageHash = keccak256(
             abi.encodePacked(_tokenId, _newTokenURI, _nonce, CHAIN_ID)
@@ -531,7 +535,7 @@ contract MintifyTest is Test {
     }
 
     function _createSignature(
-        uint _signerPrivKey,
+        uint256 _signerPrivKey,
         bytes32 _messageHash
     ) private pure returns (uint8 v, bytes32 r, bytes32 s) {
         bytes32 ethSignerMessageHash = MessageHashUtils.toEthSignedMessageHash(
