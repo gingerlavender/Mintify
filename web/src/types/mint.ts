@@ -1,4 +1,4 @@
-export type MintStatus = "first" | "repeated";
+export type MintStatus = "first" | "repeated" | "transferred";
 
 export type MintStatusResult =
   | {

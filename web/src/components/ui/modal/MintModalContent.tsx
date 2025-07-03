@@ -7,7 +7,9 @@ const messages: Record<MintStatus, string> = {
   first:
     "This is going to be your first mint! Let's sooner find out what you'll get!",
   repeated:
-    "You can see yout current NFT below. Remember you can remint it any time!",
+    "You can see yout current NFT below. Remember that you can remint it any time!",
+  transferred:
+    "Here is your minted NFT, but you cannot remint anymore as it has been transferred.",
 };
 
 interface MintModalContentProps {
