@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
-//import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
+import { isAddress } from "viem";
 
 import {
   assertNoWalletMismatch,
@@ -8,9 +9,9 @@ import {
 } from "@/lib/validation";
 import { MintStatusResult } from "@/types/mint";
 
-import { isAddress } from "viem";
 import { publicClientsByChainId } from "@/lib/publicClients";
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
+import { MintStatus } from "@/types/mint";
 
 const MintStatusRequestSchema = z.object({
   walletAddress: z
@@ -49,22 +50,56 @@ export async function POST(req: Request) {
       args: [walletAddress],
     });
 
-    if (tokenUriUpdates == 0n) {
-      return NextResponse.json<MintStatusResult>({ mintStatus: "first" });
-    }
+    const nextPrice = await publicClient.readContract({
+      address: mintifyAddress,
+      abi: mintifyAbi,
+      functionName: "getUpdatePrice",
+      args: [walletAddress],
+    });
 
-    /* const nft = await prisma.personalNFT.findUnique({
+    const nft = await prisma.personalNFT.findUnique({
       where: { userId: user.id },
     });
+
+    if ((!nft && tokenUriUpdates != 0n) || (nft && tokenUriUpdates == 0n)) {
+      throw new Error(
+        "Mismatch between mint status in blockchain and internal database"
+      );
+    }
+
     if (!nft) {
       return NextResponse.json<MintStatusResult>({
-        mintStatus: "first",
+        mintStatus: MintStatus.NotMinted,
+        nextPrice,
       });
     }
+
+    const tokenURI = await publicClient.readContract({
+      address: mintifyAddress,
+      abi: mintifyAbi,
+      functionName: "tokenURI",
+      args: [BigInt(nft.tokenId)],
+    });
+
+    const currentOwner = await publicClient.readContract({
+      address: mintifyAddress,
+      abi: mintifyAbi,
+      functionName: "ownerOf",
+      args: [BigInt(nft.tokenId)],
+    });
+
+    if (currentOwner != walletAddress) {
+      return NextResponse.json<MintStatusResult>({
+        mintStatus: MintStatus.TokenTransferred,
+        tokenURI,
+      });
+    }
+
     return NextResponse.json<MintStatusResult>({
-      mintStatus: "repeated",
-      tokenURI: nft.tokenURI, 
-    }); */
+      mintStatus: MintStatus.Minted,
+      tokenURI,
+      nextPrice,
+    });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error" },

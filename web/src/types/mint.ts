@@ -1,10 +1,20 @@
-export type MintStatus = "first" | "repeated" | "transferred";
+export enum MintStatus {
+  NotMinted,
+  Minted,
+  TokenTransferred,
+}
 
 export type MintStatusResult =
   | {
-      mintStatus: "first";
+      mintStatus: MintStatus.NotMinted;
+      nextPrice: bigint;
     }
   | {
-      mintStatus: "repeated";
+      mintStatus: MintStatus.Minted;
+      tokenURI: string;
+      nextPrice: bigint;
+    }
+  | {
+      mintStatus: MintStatus.TokenTransferred;
       tokenURI: string;
     };
