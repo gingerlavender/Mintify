@@ -29,7 +29,7 @@ const messages: Record<MintStatus, string> = {
 
 const MintModalContent = () => {
   const { writeContract, isPending, data: hash } = useWriteContract();
-  const { data: receipt } = useWaitForTransactionReceipt({
+  const { data: receipt, isSuccess } = useWaitForTransactionReceipt({
     hash,
     query: { enabled: !!hash },
   });
