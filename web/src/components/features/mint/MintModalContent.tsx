@@ -28,7 +28,7 @@ const messages: Record<MintStatus, string> = {
 };
 
 const MintModalContent = () => {
-  const { writeContractAsync, isPending, data: hash } = useWriteContract();
+  const { writeContract, isPending, data: hash } = useWriteContract();
   const { data: receipt, isSuccess } = useWaitForTransactionReceipt({
     hash,
     query: { enabled: !!hash },
@@ -64,7 +64,7 @@ const MintModalContent = () => {
         process.env.NEXT_PUBLIC_MINTIFY_ADDRESS
       );
 
-      await writeContractAsync({
+      writeContract({
         address: mintifyAddress,
         abi: mintifyAbi,
         functionName: "safeMintWithSignature",
