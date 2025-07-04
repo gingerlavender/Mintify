@@ -16,7 +16,7 @@ import {
 } from "wagmi";
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 import { assertValidAddress } from "@/lib/validation";
-import { parseEventLogs, TransactionReceipt } from "viem";
+import { parseEther, parseEventLogs, TransactionReceipt } from "viem";
 
 const messages: Record<MintStatus, string> = {
   not_minted:
@@ -74,7 +74,7 @@ const MintModalContent = () => {
           result.data.r,
           result.data.s,
         ],
-        value: BigInt(price),
+        value: parseEther(price.toString()),
       });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unknown error");
@@ -82,7 +82,7 @@ const MintModalContent = () => {
     }
   };
 
-  const handleTransactionSuccess = (receipt: TransactionReceipt) => {
+  const handleMintTxSuccess = (receipt: TransactionReceipt) => {
     try {
       const logs = parseEventLogs({
         abi: mintifyAbi,
@@ -106,8 +106,9 @@ const MintModalContent = () => {
       }
 
       setTokenId(mintedTokenId.toString());
-      setMessage(messages["minted"]);
+      setMessage("Here is your brand new NFT!");
       setPicture(process.env.NEXT_PUBLIC_PINATA_GATEWAY?.concat(tokenURI));
+      setPrice(undefined);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unknown error");
       setPicture("Error.png");
@@ -116,7 +117,7 @@ const MintModalContent = () => {
 
   useEffect(() => {
     if (receipt && isSuccess) {
-      handleTransactionSuccess(receipt);
+      handleMintTxSuccess(receipt);
     }
   }, [receipt, isSuccess]);
 
