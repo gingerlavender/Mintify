@@ -29,7 +29,11 @@ const messages: Record<MintStatus, string> = {
 
 const MintModalContent = () => {
   const { writeContract, isPending, data: hash } = useWriteContract();
-  const { data: receipt, isSuccess } = useWaitForTransactionReceipt({
+  const {
+    data: receipt,
+    isLoading: isConfirming,
+    isSuccess,
+  } = useWaitForTransactionReceipt({
     hash,
     query: { enabled: !!hash },
   });
@@ -164,7 +168,7 @@ const MintModalContent = () => {
   return (
     <>
       <p>{message}</p>
-      {tokenId && `Your minted NFT Id is ${tokenId}`}
+      {tokenId && <p>Your minted NFT Id is ${tokenId}</p>}
       {price && <p>Your current mint price (without fees): {price} ETH</p>}
       <Image
         className="w-[50vw] md:w-[20vw] rounded-2xl"
@@ -178,7 +182,7 @@ const MintModalContent = () => {
             className="modal-button"
             onClick={handleMint}
           >
-            {isPending ? "Pending..." : "Mint"}
+            {isPending ? "Pending..." : isConfirming ? "Confirming..." : "Mint"}
           </button>
         )}
       </div>
