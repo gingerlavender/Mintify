@@ -10,6 +10,7 @@ import {
 import { useLoading } from "@/hooks/useLoading";
 import { apiRequest } from "@/lib/api";
 import {
+  BaseError,
   useChainId,
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -28,11 +29,24 @@ const messages: Record<MintStatus, string> = {
 };
 
 const MintModalContent = () => {
-  const { writeContract, isPending, data: hash } = useWriteContract();
+  const {
+    writeContract,
+    isPending,
+    data: hash,
+  } = useWriteContract({
+    mutation: {
+      onError: (error) => {
+        setMessage((error as BaseError).shortMessage);
+        setPicture("Error.png");
+      },
+    },
+  });
+
   const {
     data: receipt,
     isLoading: isConfirming,
     isSuccess,
+    isError,
   } = useWaitForTransactionReceipt({
     hash,
     query: { enabled: !!hash },
@@ -123,9 +137,17 @@ const MintModalContent = () => {
 
   useEffect(() => {
     if (receipt && isSuccess) {
-      handleMintTxSuccess(receipt);
+      if (receipt.status == "success") {
+        handleMintTxSuccess(receipt);
+      } else {
+        setMessage("Transaction reverted!");
+        setPicture("Error.png");
+      }
+    } else if (isError) {
+      setMessage("Can't fetch transaction receipt");
+      setPicture("Error.png");
     }
-  }, [receipt, isSuccess]);
+  }, [receipt, isSuccess, isError]);
 
   useEffect(() => {
     (async () => {
