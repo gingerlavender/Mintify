@@ -1,24 +1,39 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { MintStatus, MintStatusResult } from "@/types/mint";
+import {
+  MintMessageWithSignature,
+  MintStatus,
+  MintStatusInfo,
+} from "@/types/mint";
 import { useLoading } from "@/hooks/useLoading";
 import { apiRequest } from "@/lib/api";
-import { useChainId } from "wagmi";
+import {
+  useChainId,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
+import { assertValidAddress } from "@/lib/validation";
+import { parseEventLogs, TransactionReceipt } from "viem";
 
 const messages: Record<MintStatus, string> = {
-  [MintStatus.NotMinted]:
+  not_minted:
     "This is going to be your first mint! Let's sooner find out what you'll get!",
-  [MintStatus.Minted]:
+  minted:
     "You can see yout current NFT below. Remember that you can remint it any time!",
-  [MintStatus.TokenTransferred]:
+  token_transferred:
     "Here is your minted NFT, but you cannot remint anymore as it has been transferred.",
 };
 
-interface MintModalContentProps {
-  closeModal: () => void;
-}
+const MintModalContent = () => {
+  const { writeContractAsync, isPending, data: hash } = useWriteContract();
+  const { data: receipt, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+    query: { enabled: !!hash },
+  });
 
-const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
   const chainId = useChainId();
 
   const { isLoading, startLoading, endLoading } = useLoading(true);
@@ -27,12 +42,89 @@ const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
   const [picture, setPicture] = useState<string>("NFTPlaceholder.png");
   const [price, setPrice] = useState<number | undefined>();
   const [mintIsForbidden, setMintIsForbidden] = useState<boolean>(false);
+  const [tokenId, setTokenId] = useState<string | undefined>();
+
+  const handleMint = async () => {
+    try {
+      if (!price) {
+        throw new Error("Missing price");
+      }
+
+      const result = await apiRequest<MintMessageWithSignature>("api/mint", {
+        headers: { "content-type": "application/json" },
+        method: "POST",
+        body: JSON.stringify({ chainId }),
+      });
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      const mintifyAddress = assertValidAddress(
+        process.env.NEXT_PUBLIC_MINTIFY_ADDRESS
+      );
+
+      await writeContractAsync({
+        address: mintifyAddress,
+        abi: mintifyAbi,
+        functionName: "safeMintWithSignature",
+        args: [
+          result.data.tokenURI,
+          Number(result.data.v),
+          result.data.r,
+          result.data.s,
+        ],
+        value: BigInt(price),
+      });
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unknown error");
+      setPicture("Error.png");
+    }
+  };
+
+  const handleTransactionSuccess = (receipt: TransactionReceipt) => {
+    try {
+      const logs = parseEventLogs({
+        abi: mintifyAbi,
+        logs: receipt.logs,
+        eventName: "Minted",
+      });
+
+      if (logs.length === 0) {
+        throw new Error("Could not find Minted event in transaction logs");
+      }
+
+      const mintEvent = logs[0];
+
+      const mintedTokenId = mintEvent.args._tokenId;
+      const tokenURI = mintEvent.args._tokenURI;
+
+      if (!process.env.NEXT_PUBLIC_PINATA_GATEWAY) {
+        throw new Error(
+          "Cannot show your NFT as there is no gateway specified. Try reopening window please"
+        );
+      }
+
+      setTokenId(mintedTokenId.toString());
+      setMessage(messages["minted"]);
+      setPicture(process.env.NEXT_PUBLIC_PINATA_GATEWAY?.concat(tokenURI));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unknown error");
+      setPicture("Error.png");
+    }
+  };
+
+  useEffect(() => {
+    if (receipt && isSuccess) {
+      handleTransactionSuccess(receipt);
+    }
+  }, [receipt, isSuccess]);
 
   useEffect(() => {
     (async () => {
       startLoading();
 
-      const result = await apiRequest<MintStatusResult>("api/mint/status", {
+      const result = await apiRequest<MintStatusInfo>("api/mint/status", {
         headers: { "content-type": "application/json" },
         method: "POST",
         body: JSON.stringify({ chainId }),
@@ -41,15 +133,15 @@ const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
       if (result.success) {
         setMessage(messages[result.data.mintStatus]);
 
-        if (result.data.mintStatus != MintStatus.TokenTransferred) {
+        if (result.data.mintStatus != "token_transferred") {
           setPrice(result.data.nextPrice);
         } else {
           setMintIsForbidden(true);
         }
 
         if (
-          result.data.mintStatus == MintStatus.Minted ||
-          result.data.mintStatus == MintStatus.TokenTransferred
+          result.data.mintStatus == "minted" ||
+          result.data.mintStatus == "token_transferred"
         ) {
           setPicture(result.data.tokenURI);
         }
@@ -69,6 +161,7 @@ const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
   return (
     <>
       <p>{message}</p>
+      {tokenId && `Your minted NFT Id is ${tokenId}`}
       {price && <p>Your current mint price (without fees): {price} ETH</p>}
       <Image
         className="w-[50vw] md:w-[20vw] rounded-2xl"
@@ -77,11 +170,11 @@ const MintModalContent: React.FC<MintModalContentProps> = ({ closeModal }) => {
       />
       <div className="flex justify-center gap-4">
         <button
-          disabled={mintIsForbidden}
+          disabled={mintIsForbidden || isPending}
           className="modal-button"
-          onClick={closeModal}
+          onClick={handleMint}
         >
-          Mint
+          {isPending ? "Pending..." : "Mint"}
         </button>
       </div>
     </>

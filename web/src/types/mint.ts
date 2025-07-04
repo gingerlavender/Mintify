@@ -1,20 +1,36 @@
-export enum MintStatus {
-  NotMinted,
-  Minted,
-  TokenTransferred,
-}
+export type MintStatus = "not_minted" | "minted" | "token_transferred";
 
-export type MintStatusResult =
+export type MintStatusInfo =
   | {
-      mintStatus: MintStatus.NotMinted;
+      mintStatus: "not_minted";
       nextPrice: number;
     }
   | {
-      mintStatus: MintStatus.Minted;
+      mintStatus: "minted";
       tokenURI: string;
       nextPrice: number;
     }
   | {
-      mintStatus: MintStatus.TokenTransferred;
+      mintStatus: "token_transferred";
       tokenURI: string;
     };
+
+interface Signature {
+  v: string;
+  r: `0x${string}`;
+  s: `0x${string}`;
+}
+
+interface MintMessage {
+  tokenURI: string;
+  nonce: string;
+  chainId: number;
+}
+
+export type MintMessageWithSignature = MintMessage & Signature;
+
+interface RemintMessage extends MintMessage {
+  tokenId: string;
+}
+
+export type RemintMessageWithSignature = RemintMessage & Signature;

@@ -17,3 +17,13 @@ export const publicClientsByChainId = {
     }),
   }),
 } as const;
+
+export const getPublicClientByChainId = (chainId: number) => {
+  const publicClient =
+    publicClientsByChainId[chainId as keyof typeof publicClientsByChainId];
+
+  if (!publicClient) {
+    throw new Error(`No public client configured for chain id ${chainId}`);
+  }
+  return publicClient;
+};

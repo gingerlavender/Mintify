@@ -1,14 +1,16 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { formatEther, isAddress } from "viem";
+import { formatEther } from "viem";
 
-import { assertValidConnection } from "@/lib/validation";
-import { MintStatusResult } from "@/types/mint";
+import { assertValidAddress, assertValidConnection } from "@/lib/validation";
+import { MintStatusInfo } from "@/types/mint";
 
-import { publicClientsByChainId } from "@/lib/publicClients";
+import {
+  getPublicClientByChainId,
+  publicClientsByChainId,
+} from "@/lib/public-clients";
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
-import { MintStatus } from "@/types/mint";
 
 const MintStatusRequestSchema = z.object({
   chainId: z.number().refine((id) => {
@@ -22,29 +24,18 @@ export async function POST(req: Request) {
     const { chainId } = MintStatusRequestSchema.parse(rawBody);
 
     const user = await assertValidConnection();
+    const walletAddress = assertValidAddress(user.wallet);
+    const mintifyAddress = assertValidAddress(
+      process.env.NEXT_PUBLIC_MINTIFY_ADDRESS
+    );
 
-    if (!user.wallet || !isAddress(user.wallet)) {
-      throw new Error("Missing or incorrect wallet address");
-    }
-
-    const publicClient =
-      publicClientsByChainId[chainId as keyof typeof publicClientsByChainId];
-
-    if (!publicClient) {
-      throw new Error(`No public client configured for chain id ${chainId}`);
-    }
-
-    const mintifyAddress = process.env.NEXT_PUBLIC_MINTIFY_ADDRESS;
-
-    if (!mintifyAddress || !isAddress(mintifyAddress)) {
-      throw new Error("Invalid or no contract address");
-    }
+    const publicClient = getPublicClientByChainId(chainId);
 
     const tokenUriUpdates = await publicClient.readContract({
       address: mintifyAddress,
       abi: mintifyAbi,
       functionName: "tokenUriUpdates",
-      args: [user.wallet],
+      args: [walletAddress],
     });
 
     const nextPrice = Number(
@@ -53,7 +44,7 @@ export async function POST(req: Request) {
           address: mintifyAddress,
           abi: mintifyAbi,
           functionName: "getPrice",
-          args: [user.wallet],
+          args: [walletAddress],
         })
       )
     );
@@ -69,8 +60,8 @@ export async function POST(req: Request) {
     }
 
     if (!nft) {
-      return NextResponse.json<MintStatusResult>({
-        mintStatus: MintStatus.NotMinted,
+      return NextResponse.json<MintStatusInfo>({
+        mintStatus: "not_minted",
         nextPrice,
       });
     }
@@ -90,14 +81,14 @@ export async function POST(req: Request) {
     });
 
     if (currentOwner != user.wallet) {
-      return NextResponse.json<MintStatusResult>({
-        mintStatus: MintStatus.TokenTransferred,
+      return NextResponse.json<MintStatusInfo>({
+        mintStatus: "token_transferred",
         tokenURI,
       });
     }
 
-    return NextResponse.json<MintStatusResult>({
-      mintStatus: MintStatus.Minted,
+    return NextResponse.json<MintStatusInfo>({
+      mintStatus: "minted",
       tokenURI,
       nextPrice,
     });
