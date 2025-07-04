@@ -52,10 +52,9 @@ export async function POST(req: Request) {
     );
 
     const messageHash = keccak256(message);
-    const ethSignedMessageHash = hashMessage(messageHash);
 
     const signature = await signer.signMessage({
-      message: ethSignedMessageHash,
+      message: messageHash,
     });
 
     const { v, r, s } = parseSignature(signature);
