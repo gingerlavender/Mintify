@@ -18,7 +18,7 @@ contract Mintify is
     UUPSUpgradeable
 {
     string private constant PINATA_GATEWAY =
-        "https://crimson-bitter-horse-871.mypinata.cloud/";
+        "https://crimson-bitter-horse-871.mypinata.cloud/ipfs/";
 
     address private _trustedSigner;
 

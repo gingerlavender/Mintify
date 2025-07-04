@@ -21,7 +21,7 @@ contract MintifyTest is Test {
 
     uint256 constant CHAIN_ID = 31337;
     string constant BASE_URI =
-        "https://crimson-bitter-horse-871.mypinata.cloud/";
+        "https://crimson-bitter-horse-871.mypinata.cloud/ipfs/";
 
     Mintify mintify;
     address trustedSigner;
