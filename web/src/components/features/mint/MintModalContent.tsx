@@ -53,7 +53,7 @@ const MintModalContent = () => {
       const result = await apiRequest<MintMessageWithSignature>("api/mint", {
         headers: { "content-type": "application/json" },
         method: "POST",
-        body: JSON.stringify({ chainId }),
+        body: JSON.stringify({ type: "mint", chainId }),
       });
 
       if (!result.success) {
