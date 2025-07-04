@@ -28,7 +28,13 @@ const messages: Record<MintStatus, string> = {
 };
 
 const MintModalContent = () => {
-  const { writeContractAsync, isPending, data: hash } = useWriteContract();
+  const {
+    writeContractAsync,
+    isPending,
+    data: hash,
+    error,
+    isError,
+  } = useWriteContract();
   const { data: receipt, isSuccess } = useWaitForTransactionReceipt({
     hash,
     query: { enabled: !!hash },
@@ -90,7 +96,7 @@ const MintModalContent = () => {
         eventName: "Minted",
       });
 
-      if (logs.length === 0) {
+      if (logs.length == 0) {
         throw new Error("Could not find Minted event in transaction logs");
       }
 
@@ -114,6 +120,13 @@ const MintModalContent = () => {
       setPicture("Error.png");
     }
   };
+
+  useEffect(() => {
+    if (isError && error) {
+      setMessage(error.message);
+      setPicture("Error");
+    }
+  }, [error, isError]);
 
   useEffect(() => {
     if (receipt && isSuccess) {
