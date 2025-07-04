@@ -8,7 +8,7 @@ import {
 import { assertValidAddress, assertValidConnection } from "@/lib/validation";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
-import { encodePacked, hashMessage, keccak256, parseSignature } from "viem";
+import { encodePacked, keccak256, parseSignature } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { NextResponse } from "next/server";
 import { MintMessageWithSignature } from "@/types/mint";
