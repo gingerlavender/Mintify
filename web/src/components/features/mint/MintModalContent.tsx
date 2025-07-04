@@ -29,7 +29,7 @@ const messages: Record<MintStatus, string> = {
 
 const MintModalContent = () => {
   const { writeContract, isPending, data: hash } = useWriteContract();
-  const { data: receipt, isSuccess } = useWaitForTransactionReceipt({
+  const { data: receipt } = useWaitForTransactionReceipt({
     hash,
     query: { enabled: !!hash },
   });
@@ -41,7 +41,7 @@ const MintModalContent = () => {
   const [message, setMessage] = useState<string | undefined>();
   const [picture, setPicture] = useState<string>("NFTPlaceholder.png");
   const [price, setPrice] = useState<number | undefined>();
-  const [mintIsForbidden, setMintIsForbidden] = useState<boolean>(false);
+  const [canMint, setCanMint] = useState<boolean>(true);
   const [tokenId, setTokenId] = useState<string | undefined>();
 
   const handleMint = async () => {
@@ -108,6 +108,8 @@ const MintModalContent = () => {
       setTokenId(mintedTokenId.toString());
       setMessage("Here is your brand new NFT!");
       setPicture(process.env.NEXT_PUBLIC_PINATA_GATEWAY?.concat(tokenURI));
+
+      setCanMint(false);
       setPrice(undefined);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unknown error");
@@ -137,7 +139,7 @@ const MintModalContent = () => {
         if (result.data.mintStatus != "token_transferred") {
           setPrice(result.data.nextPrice);
         } else {
-          setMintIsForbidden(true);
+          setCanMint(false);
         }
 
         if (
@@ -170,13 +172,15 @@ const MintModalContent = () => {
         alt="NFT Preview"
       />
       <div className="flex justify-center gap-4">
-        <button
-          disabled={mintIsForbidden || isPending}
-          className="modal-button"
-          onClick={handleMint}
-        >
-          {isPending ? "Pending..." : "Mint"}
-        </button>
+        {canMint && (
+          <button
+            disabled={isPending}
+            className="modal-button"
+            onClick={handleMint}
+          >
+            {isPending ? "Pending..." : "Mint"}
+          </button>
+        )}
       </div>
     </>
   );
