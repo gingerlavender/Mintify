@@ -28,13 +28,7 @@ const messages: Record<MintStatus, string> = {
 };
 
 const MintModalContent = () => {
-  const {
-    writeContractAsync,
-    isPending,
-    data: hash,
-    error,
-    isError,
-  } = useWriteContract();
+  const { writeContractAsync, isPending, data: hash } = useWriteContract();
   const { data: receipt, isSuccess } = useWaitForTransactionReceipt({
     hash,
     query: { enabled: !!hash },
@@ -120,13 +114,6 @@ const MintModalContent = () => {
       setPicture("Error.png");
     }
   };
-
-  useEffect(() => {
-    if (isError && error) {
-      setMessage(error.message);
-      setPicture("Error");
-    }
-  }, [error, isError]);
 
   useEffect(() => {
     if (receipt && isSuccess) {

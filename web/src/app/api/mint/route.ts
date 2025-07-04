@@ -8,7 +8,7 @@ import {
 import { assertValidAddress, assertValidConnection } from "@/lib/validation";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
-import { encodePacked, keccak256, parseSignature } from "viem";
+import { encodePacked, hashMessage, keccak256, parseSignature } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { NextResponse } from "next/server";
 import { MintMessageWithSignature } from "@/types/mint";
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     const messageHash = keccak256(message);
 
     const signature = await signer.signMessage({
-      message: messageHash,
+      message: { raw: messageHash },
     });
 
     const { v, r, s } = parseSignature(signature);
