@@ -34,10 +34,17 @@ export const useMintNFT = () => {
         chainId,
       });
 
-      const receipt = await waitForTransactionReceipt(config, {
-        hash,
-        chainId,
-      });
+      let receipt;
+      try {
+        receipt = await waitForTransactionReceipt(config, {
+          hash,
+          chainId,
+        });
+      } catch (error) {
+        throw new Error(
+          (error as BaseError).shortMessage || "Unknown on-chain error"
+        );
+      }
       if (receipt.status === "reverted") {
         throw new Error("Transaction was reverted");
       }
