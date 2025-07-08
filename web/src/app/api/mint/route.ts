@@ -80,6 +80,7 @@ export async function POST(req: Request) {
       });
     }
   } catch (error) {
+    console.error(error);
     return (
       handleDatabaseErrors(error) ??
       handleContractErrors(error) ??

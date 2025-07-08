@@ -76,6 +76,7 @@ const MintModalContent = () => {
               queryKey: ["mintStatus", chainId],
             });
           },
+          onError: (error) => console.error(error),
         }
       );
     }

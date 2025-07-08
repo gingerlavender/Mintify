@@ -38,8 +38,6 @@ export class PermissionError extends Error {
 }
 
 export function handleCommonErrors(error: unknown) {
-  console.error("API error: ", error);
-
   if (
     error instanceof AuthError ||
     error instanceof ValidationError ||

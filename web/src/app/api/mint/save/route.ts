@@ -62,6 +62,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({});
   } catch (error) {
+    console.error(error);
     return (
       handleContractErrors(error) ??
       handleDatabaseErrors(error) ??
