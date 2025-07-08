@@ -91,8 +91,10 @@ const MintModalContent = () => {
     <>
       {isMintError && <p>Mint error: {mintError.message}</p>}
       {isFetchError && <p>Fetch error: {fetchError.message}</p>}
-      {mintStatus && <p>{messages[mintStatus]}</p>}
-      {price && <p>Your current mint price (without fees): {price} ETH</p>}
+      {!isError && mintStatus && <p>{messages[mintStatus]}</p>}
+      {!isError && price && (
+        <p>Your current mint price (without fees): {price} ETH</p>
+      )}
       <Image
         className="w-[50vw] md:w-[20vw] rounded-2xl"
         src={isError ? "Error.png" : nftPicture}

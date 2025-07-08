@@ -3,7 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { waitForTransactionReceipt, writeContract } from "wagmi/actions";
 import { isAddress, parseEther, parseEventLogs } from "viem";
-import { Config, useConfig } from "wagmi";
+import { BaseError, Config, useConfig } from "wagmi";
 
 import { apiRequest } from "@/lib/api/requests";
 
@@ -54,7 +54,7 @@ export const useMintNFT = () => {
       const mintedEvent = logs[0];
       const tokenId = mintedEvent.args._tokenId;
 
-      saveToDatabase.mutateAsync({ tokenId, chainId });
+      await saveToDatabase.mutateAsync({ tokenId, chainId });
     },
   });
 };
@@ -91,14 +91,20 @@ const useSafeMintWithSignature = (config: Config) => {
         throw new Error("Missing or incorrect contract address");
       }
 
-      return await writeContract(config, {
-        address: mintifyAddress,
-        abi: mintifyAbi,
-        functionName: "safeMintWithSignature",
-        args: [args.tokenURI, Number(args.v), args.r, args.s],
-        value: parseEther(price.toString()),
-        chainId,
-      });
+      try {
+        return await writeContract(config, {
+          address: mintifyAddress,
+          abi: mintifyAbi,
+          functionName: "safeMintWithSignature",
+          args: [args.tokenURI, Number(args.v), args.r, args.s],
+          value: parseEther(price.toString()),
+          chainId,
+        });
+      } catch (error) {
+        throw new Error(
+          (error as BaseError).shortMessage || "Unknown on-chain error"
+        );
+      }
     },
   });
 };
