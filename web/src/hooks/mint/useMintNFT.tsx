@@ -54,7 +54,7 @@ export const useMintNFT = () => {
       const mintedEvent = logs[0];
       const tokenId = mintedEvent.args._tokenId;
 
-      saveToDatabase.mutateAsync({ tokenId });
+      saveToDatabase.mutateAsync({ tokenId, chainId });
     },
   });
 };
@@ -105,11 +105,17 @@ const useSafeMintWithSignature = (config: Config) => {
 
 const useSaveToDatabase = () => {
   return useMutation({
-    mutationFn: async ({ tokenId }: { tokenId: bigint }) => {
+    mutationFn: async ({
+      tokenId,
+      chainId,
+    }: {
+      tokenId: bigint;
+      chainId: number;
+    }) => {
       const result = await apiRequest("/api/mint/save", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ tokenId: tokenId.toString() }),
+        body: JSON.stringify({ tokenId: tokenId.toString(), chainId }),
       });
       if (!result.success)
         throw new Error(`Saving to DB failed: ${result.error}`);
