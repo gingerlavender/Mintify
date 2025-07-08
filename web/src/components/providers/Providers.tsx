@@ -2,7 +2,7 @@
 
 import { SessionProvider } from "next-auth/react";
 
-import { Web3Provider } from "../features/wallet/Web3Provider";
+import { Web3Provider } from "./Web3Provider";
 import { ModalProvider } from "./ModalProvider";
 
 interface ProvidersProps {
