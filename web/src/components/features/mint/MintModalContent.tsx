@@ -9,6 +9,7 @@ import { apiRequest } from "@/lib/api/requests";
 import { MintStatus, MintStatusInfo } from "@/types/mint";
 
 import { useMintNFT } from "@/hooks/mint/useMintNFT";
+import { useMintModal } from "@/hooks/modal/useMintModal";
 
 const messages: Record<MintStatus, string> = {
   not_minted:
@@ -20,6 +21,8 @@ const messages: Record<MintStatus, string> = {
 };
 
 const MintModalContent = () => {
+  const { closeMintModal } = useMintModal();
+
   const chainId = useChainId();
 
   const queryClient = useQueryClient();
@@ -105,9 +108,9 @@ const MintModalContent = () => {
           <button
             disabled={isPending}
             className="modal-button"
-            onClick={handleMint({ price, chainId })}
+            onClick={isError ? closeMintModal : handleMint({ price, chainId })}
           >
-            {isPending ? "Pending..." : "Mint"}
+            {isPending ? "Pending..." : isError ? "Close" : "Mint"}
           </button>
         )}
       </div>
