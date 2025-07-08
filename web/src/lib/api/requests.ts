@@ -20,7 +20,6 @@ export async function apiRequest<T = unknown>(
       data,
     };
   } catch (error) {
-    console.error(error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
