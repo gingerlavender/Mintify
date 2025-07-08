@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useChainId } from "wagmi";
+import { BaseError, useChainId } from "wagmi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiRequest } from "@/lib/api/requests";
@@ -88,7 +88,14 @@ const MintModalContent = () => {
 
   return (
     <>
-      {isMintError && <p>Mint error: {mintError.message}</p>}
+      {isMintError && (
+        <p>
+          {`Mint error: ${
+            (mintError as BaseError).shortMessage ||
+            (mintError instanceof Error ? mintError.message : "Unknown error")
+          }`}
+        </p>
+      )}
       {isFetchError && <p>Fetch error: {fetchError.message}</p>}
       {!isError && mintStatus && <p>{messages[mintStatus]}</p>}
       {!isError && price && (
