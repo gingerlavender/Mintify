@@ -4,7 +4,7 @@ import { useModal } from "./useModal";
 import MintModalContent from "@/components/features/mint/MintModalContent";
 
 export const useMintModal = () => {
-  const { openModal } = useModal();
+  const { openModal, closeModal } = useModal();
 
   const openMintModal = () => {
     openModal({
@@ -13,5 +13,5 @@ export const useMintModal = () => {
     });
   };
 
-  return { openMintModal };
+  return { openMintModal, closeMintModal: closeModal };
 };

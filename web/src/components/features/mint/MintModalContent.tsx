@@ -66,14 +66,8 @@ const MintModalContent = () => {
       ? "NFTPlaceholder.png"
       : mintStatusInfo.tokenURI;
 
-  const handleMint = ({
-    price,
-    chainId,
-  }: {
-    price: number;
-    chainId: number;
-  }) => {
-    return () =>
+  const handleMint = () => {
+    if (price) {
       mint(
         { price, chainId },
         {
@@ -84,6 +78,7 @@ const MintModalContent = () => {
           },
         }
       );
+    }
   };
 
   if (isLoading) {
@@ -108,7 +103,7 @@ const MintModalContent = () => {
           <button
             disabled={isPending}
             className="modal-button"
-            onClick={isError ? closeMintModal : handleMint({ price, chainId })}
+            onClick={isError ? closeMintModal : handleMint}
           >
             {isPending ? "Pending..." : isError ? "Close" : "Mint"}
           </button>
