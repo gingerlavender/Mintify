@@ -91,8 +91,7 @@ const MintModalContent = () => {
       {isMintError && (
         <p>
           {`Mint error: ${
-            (mintError as BaseError).shortMessage ||
-            (mintError instanceof Error ? mintError.message : "Unknown error")
+            (mintError as BaseError).shortMessage || mintError.message
           }`}
         </p>
       )}
