@@ -24,7 +24,7 @@ export const assertValidConnection = async () => {
 
 export const assertValidAddress = (address: string | null | undefined) => {
   if (!address || !isAddress(address)) {
-    throw new ValidationError("Missing or incorrect address");
+    throw new ValidationError("Missing or incorrect contract address");
   }
 
   return address;

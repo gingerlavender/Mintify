@@ -2,11 +2,10 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { waitForTransactionReceipt, writeContract } from "wagmi/actions";
-import { parseEther, parseEventLogs } from "viem";
+import { isAddress, parseEther, parseEventLogs } from "viem";
 import { Config, useConfig } from "wagmi";
 
 import { apiRequest } from "@/lib/api/requests";
-import { assertValidAddress } from "@/lib/api/validation";
 
 import { MintArgsWithSignature } from "@/types/mint";
 
@@ -87,9 +86,10 @@ const useSafeMintWithSignature = (config: Config) => {
       price: number;
       chainId: number;
     }) => {
-      const mintifyAddress = assertValidAddress(
-        process.env.NEXT_PUBLIC_MINTIFY_ADDRESS
-      );
+      const mintifyAddress = process.env.NEXT_PUBLIC_MINTIFY_ADDRESS;
+      if (!mintifyAddress || !isAddress(mintifyAddress)) {
+        throw new Error("Missing or incorrect contract address");
+      }
 
       return await writeContract(config, {
         address: mintifyAddress,
