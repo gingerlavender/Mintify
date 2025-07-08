@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useState, ReactNode, useCallback } from "react";
+
 import Modal from "../ui/modal/Modal";
 
 interface ModalOptions {

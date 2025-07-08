@@ -1,12 +1,19 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
+import { NextResponse } from "next/server";
+import { isAddress } from "viem";
+
 import { prisma } from "@/lib/prisma";
-import { assertValidConnection } from "@/lib/validation";
+import { assertValidConnection } from "@/lib/api/validation";
+import {
+  handleCommonErrors,
+  handleDatabaseErrors,
+  PermissionError,
+} from "@/lib/api/error-handling";
 
 const WalletLinkRequestSchema = z.object({
   walletAddress: z
     .string()
-    .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid ETH address format"),
+    .refine((val) => isAddress(val), { message: "Invalid wallet address" }),
 });
 
 export async function POST(req: Request) {
@@ -21,14 +28,12 @@ export async function POST(req: Request) {
         where: { id: user.id },
         data: { wallet: walletAddress },
       });
-      return NextResponse.json({ success: true });
+    } else {
+      throw new PermissionError("You cannot link wallet to your account twice");
     }
 
-    throw new Error("Some wallet is already linked to this account");
+    return NextResponse.json({});
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 403 }
-    );
+    return handleDatabaseErrors(error) ?? handleCommonErrors(error);
   }
 }

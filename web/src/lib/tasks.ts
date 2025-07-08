@@ -1,4 +1,5 @@
 import { TaskConfig, TaskType } from "@/types/tasks";
+
 import WalletConnectButton from "@/components/features/wallet/WalletConnectButton";
 import SpotifyConnectButton from "@/components/features/spotify/SpotifyConnectButton";
 import MintButton from "@/components/features/mint/MintButton";

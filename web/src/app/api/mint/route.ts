@@ -1,22 +1,30 @@
 import { z } from "zod";
-
-import { createURIForUser } from "@/lib/image-generation";
-import {
-  getPublicClientByChainId,
-  publicClientsByChainId,
-} from "@/lib/public-clients";
-import { assertValidAddress, assertValidConnection } from "@/lib/validation";
-
-import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
+import { NextResponse } from "next/server";
 import { encodePacked, keccak256, parseSignature } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { NextResponse } from "next/server";
-import { MintMessageWithSignature } from "@/types/mint";
+
+import { createURIForUser } from "@/lib/image-generation";
+import { publicClients } from "@/lib/public-clients";
+import {
+  assertValidAddress,
+  assertValidConnection,
+} from "@/lib/api/validation";
+import {
+  handleCommonErrors,
+  handleContractErrors,
+  handleDatabaseErrors,
+} from "@/lib/api/error-handling";
+
+import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
+
+import { ChainId, MintArgsWithSignature } from "@/types/mint";
 
 const MintRequestSchema = z.object({
-  type: z.union([z.literal("mint"), z.literal("remint")]),
-  chainId: z.number().refine((id) => {
-    return id in publicClientsByChainId;
+  type: z.string().refine((val) => val === "mint" || val === "remint", {
+    message: "Invalid action type",
+  }),
+  chainId: z.number().refine((id): id is ChainId => id in publicClients, {
+    message: "Invalid chain id",
   }),
 });
 
@@ -31,7 +39,7 @@ export async function POST(req: Request) {
       process.env.NEXT_PUBLIC_MINTIFY_ADDRESS
     );
 
-    const publicClient = getPublicClientByChainId(chainId);
+    const publicClient = publicClients[chainId]!;
 
     const signer = privateKeyToAccount(
       process.env.TRUSTED_SIGNER_PRIV_KEY as `0x${string}`
@@ -58,25 +66,24 @@ export async function POST(req: Request) {
 
     const { v, r, s } = parseSignature(signature);
 
-    if (v == undefined) {
+    if (v === undefined) {
       throw new Error("Cannot retrieve v from signature");
     }
 
-    if (type == "remint") {
+    if (type === "remint") {
     } else {
-      return NextResponse.json<MintMessageWithSignature>({
-        nonce: nonce.toString(),
+      return NextResponse.json<MintArgsWithSignature>({
         tokenURI,
-        chainId,
         v: v.toString(),
         r,
         s,
       });
     }
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 400 }
+    return (
+      handleDatabaseErrors(error) ??
+      handleContractErrors(error) ??
+      handleCommonErrors(error)
     );
   }
 }

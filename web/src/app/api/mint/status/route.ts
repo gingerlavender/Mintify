@@ -3,19 +3,24 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { formatEther } from "viem";
 
-import { assertValidAddress, assertValidConnection } from "@/lib/validation";
-import { MintStatusInfo } from "@/types/mint";
-
 import {
-  getPublicClientByChainId,
-  publicClientsByChainId,
-} from "@/lib/public-clients";
+  assertValidAddress,
+  assertValidConnection,
+} from "@/lib/api/validation";
+import { ChainId, MintStatusInfo } from "@/types/mint";
+
+import { publicClients } from "@/lib/public-clients";
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
+import {
+  handleCommonErrors,
+  handleContractErrors,
+  handleDatabaseErrors,
+} from "@/lib/api/error-handling";
 
 const MintStatusRequestSchema = z.object({
-  chainId: z.number().refine((id) => {
-    return id in publicClientsByChainId;
-  }, "Invalid chain id"),
+  chainId: z.number().refine((id): id is ChainId => id in publicClients, {
+    message: "Invalid chain id",
+  }),
 });
 
 export async function POST(req: Request) {
@@ -29,7 +34,7 @@ export async function POST(req: Request) {
       process.env.NEXT_PUBLIC_MINTIFY_ADDRESS
     );
 
-    const publicClient = getPublicClientByChainId(chainId);
+    const publicClient = publicClients[chainId]!;
 
     const tokenUriUpdates = await publicClient.readContract({
       address: mintifyAddress,
@@ -53,7 +58,7 @@ export async function POST(req: Request) {
       where: { userId: user.id },
     });
 
-    if ((!nft && tokenUriUpdates != 0n) || (nft && tokenUriUpdates == 0n)) {
+    if ((!nft && tokenUriUpdates !== 0n) || (nft && tokenUriUpdates === 0n)) {
       throw new Error(
         "Mismatch between mint status in blockchain and internal database"
       );
@@ -93,9 +98,10 @@ export async function POST(req: Request) {
       nextPrice,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 403 }
+    return (
+      handleDatabaseErrors(error) ??
+      handleContractErrors(error) ??
+      handleCommonErrors(error)
     );
   }
 }

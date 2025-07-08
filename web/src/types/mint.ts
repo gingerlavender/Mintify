@@ -1,3 +1,7 @@
+import { publicClients } from "@/lib/public-clients";
+
+export type ChainId = keyof typeof publicClients;
+
 export type MintStatus = "not_minted" | "minted" | "token_transferred";
 
 export type MintStatusInfo =
@@ -21,16 +25,14 @@ interface Signature {
   s: `0x${string}`;
 }
 
-interface MintMessage {
+interface MintArgs {
   tokenURI: string;
-  nonce: string;
-  chainId: number;
 }
 
-export type MintMessageWithSignature = MintMessage & Signature;
+export type MintArgsWithSignature = MintArgs & Signature;
 
-interface RemintMessage extends MintMessage {
+interface RemintArgs extends MintArgs {
   tokenId: string;
 }
 
-export type RemintMessageWithSignature = RemintMessage & Signature;
+export type RemintArgsWithSignature = RemintArgs & Signature;

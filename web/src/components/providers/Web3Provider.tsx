@@ -1,12 +1,11 @@
 "use client";
 
-import type React from "react";
+import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Config, WagmiProvider, http } from "wagmi";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { mainnet, optimism, optimismSepolia } from "wagmi/chains";
-import { useEffect, useState } from "react";
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [config, setConfig] = useState<Config>();

@@ -1,8 +1,9 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import ButtonWithAvatar from "@/components/ui/buttons/ButtonWithAvatar";
 import { useSession } from "next-auth/react";
+
+import ButtonWithAvatar from "@/components/ui/buttons/ButtonWithAvatar";
 
 const WalletConnectButton = () => {
   const { data: session } = useSession();

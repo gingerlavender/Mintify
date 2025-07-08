@@ -1,8 +1,10 @@
 "use client";
 
 import { signIn, signOut, useSession } from "next-auth/react";
+
 import ButtonWithAvatar from "@/components/ui/buttons/ButtonWithAvatar";
-import { useLoading } from "@/hooks/useLoading";
+
+import { useLoading } from "@/hooks/common/useLoading";
 
 const SpotifyConnectButton = () => {
   const { data: session } = useSession();

@@ -1,11 +1,13 @@
 "use client";
 
-import { useErrorModal } from "@/hooks/modal/useErrorModal";
-import { apiRequest } from "@/lib/api";
-import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { useAccount, useDisconnect } from "wagmi";
-import { useOnceWhen } from "@/hooks/useOnceWhen";
+
+import { useErrorModal } from "@/hooks/modal/useErrorModal";
+import { useOnceWhen } from "@/hooks/common/useOnceWhen";
+
+import { apiRequest } from "@/lib/api/requests";
 
 const WalletLinker = () => {
   const { data: session, update: updateSession } = useSession();
@@ -46,7 +48,7 @@ const WalletLinker = () => {
     const hasSessionWithStoredWallet = !!session?.user.wallet;
     const loggedWithWalletProvider = address && isConnected;
     const walletsNotMatch =
-      session?.user.wallet?.toLowerCase() != address?.toLowerCase();
+      session?.user.wallet?.toLowerCase() !== address?.toLowerCase();
 
     if (hasSessionWithStoredWallet) {
       if (loggedWithWalletProvider) {

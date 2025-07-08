@@ -1,23 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import {
-  MintMessageWithSignature,
-  MintStatus,
-  MintStatusInfo,
-} from "@/types/mint";
-import { useLoading } from "@/hooks/useLoading";
-import { apiRequest } from "@/lib/api";
-import {
-  BaseError,
-  useChainId,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from "wagmi";
-import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
-import { assertValidAddress } from "@/lib/validation";
-import { parseEther, parseEventLogs, TransactionReceipt } from "viem";
+import { useChainId } from "wagmi";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { apiRequest } from "@/lib/api/requests";
+
+import { MintStatus, MintStatusInfo } from "@/types/mint";
+
+import { useMintNFT } from "@/hooks/mint/useMintNFT";
 
 const messages: Record<MintStatus, string> = {
   not_minted:
@@ -29,159 +20,68 @@ const messages: Record<MintStatus, string> = {
 };
 
 const MintModalContent = () => {
-  const {
-    writeContract,
-    isPending,
-    data: hash,
-  } = useWriteContract({
-    mutation: {
-      onError: (error) => {
-        setMessage((error as BaseError).shortMessage);
-        setPicture("Error.png");
-      },
-    },
-  });
-
-  const {
-    data: receipt,
-    isLoading: isConfirming,
-    isSuccess,
-    isError,
-  } = useWaitForTransactionReceipt({
-    hash,
-    query: { enabled: !!hash },
-  });
-
   const chainId = useChainId();
 
-  const { isLoading, startLoading, endLoading } = useLoading(true);
+  const queryClient = useQueryClient();
 
-  const [message, setMessage] = useState<string | undefined>();
-  const [picture, setPicture] = useState<string>("NFTPlaceholder.png");
-  const [price, setPrice] = useState<number | undefined>();
-  const [canMint, setCanMint] = useState<boolean>(true);
-  const [tokenId, setTokenId] = useState<string | undefined>();
+  const {
+    mutate: mint,
+    isPending,
+    isError: isMintError,
+    error: mintError,
+  } = useMintNFT();
 
-  const handleMint = async () => {
-    try {
-      if (!price) {
-        throw new Error("Missing price");
-      }
-
-      const result = await apiRequest<MintMessageWithSignature>("api/mint", {
-        headers: { "content-type": "application/json" },
-        method: "POST",
-        body: JSON.stringify({ type: "mint", chainId }),
-      });
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      const mintifyAddress = assertValidAddress(
-        process.env.NEXT_PUBLIC_MINTIFY_ADDRESS
-      );
-
-      writeContract({
-        address: mintifyAddress,
-        abi: mintifyAbi,
-        functionName: "safeMintWithSignature",
-        args: [
-          result.data.tokenURI,
-          Number(result.data.v),
-          result.data.r,
-          result.data.s,
-        ],
-        value: parseEther(price.toString()),
-      });
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unknown error");
-      setPicture("Error.png");
-    }
-  };
-
-  const handleMintTxSuccess = (receipt: TransactionReceipt) => {
-    try {
-      const logs = parseEventLogs({
-        abi: mintifyAbi,
-        logs: receipt.logs,
-        eventName: "Minted",
-      });
-
-      if (logs.length == 0) {
-        throw new Error("Could not find Minted event in transaction logs");
-      }
-
-      const mintEvent = logs[0];
-
-      const mintedTokenId = mintEvent.args._tokenId;
-      const tokenURI = mintEvent.args._tokenURI;
-
-      if (!process.env.NEXT_PUBLIC_PINATA_GATEWAY) {
-        throw new Error(
-          "Cannot show your NFT as there is no gateway specified. Try reopening window please"
-        );
-      }
-
-      setTokenId(mintedTokenId.toString());
-      setMessage("Here is your brand new NFT!");
-      setPicture(process.env.NEXT_PUBLIC_PINATA_GATEWAY?.concat(tokenURI));
-
-      setCanMint(false);
-      setPrice(undefined);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unknown error");
-      setPicture("Error.png");
-    }
-  };
-
-  useEffect(() => {
-    if (receipt && isSuccess) {
-      if (receipt.status == "success") {
-        handleMintTxSuccess(receipt);
-      } else {
-        setMessage("Transaction reverted!");
-        setPicture("Error.png");
-      }
-    } else if (isError) {
-      setMessage("Can't fetch transaction receipt");
-      setPicture("Error.png");
-    }
-  }, [receipt, isSuccess, isError]);
-
-  useEffect(() => {
-    (async () => {
-      startLoading();
-
+  const {
+    data: mintStatusInfo,
+    isLoading,
+    isError: isFetchError,
+    error: fetchError,
+  } = useQuery({
+    queryKey: ["mintStatus", chainId],
+    queryFn: async () => {
       const result = await apiRequest<MintStatusInfo>("api/mint/status", {
         headers: { "content-type": "application/json" },
         method: "POST",
         body: JSON.stringify({ chainId }),
       });
-
-      if (result.success) {
-        setMessage(messages[result.data.mintStatus]);
-
-        if (result.data.mintStatus != "token_transferred") {
-          setPrice(result.data.nextPrice);
-        } else {
-          setCanMint(false);
-        }
-
-        if (
-          result.data.mintStatus == "minted" ||
-          result.data.mintStatus == "token_transferred"
-        ) {
-          setPicture(result.data.tokenURI);
-        }
-      } else {
-        setMessage(result.error);
-        setPicture("Error.png");
+      if (!result.success) {
+        throw new Error(result.error);
       }
+      return result.data;
+    },
+    staleTime: Infinity,
+  });
 
-      endLoading();
-    })();
-  }, [chainId, startLoading, endLoading]);
+  const isError = isFetchError || isMintError;
+
+  const mintStatus = mintStatusInfo?.mintStatus;
+
+  const canMint = mintStatus !== "token_transferred";
+  const price = canMint ? mintStatusInfo?.nextPrice : undefined;
+  const nftPicture =
+    !mintStatusInfo || mintStatus === "not_minted"
+      ? "NFTPlaceholder.png"
+      : mintStatusInfo.tokenURI;
+
+  const handleMint = ({
+    price,
+    chainId,
+  }: {
+    price: number;
+    chainId: number;
+  }) => {
+    return () =>
+      mint(
+        { price, chainId },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({
+              queryKey: ["mintStatus", chainId],
+            });
+          },
+        }
+      );
+  };
 
   if (isLoading) {
     return <p>Loading...</p>;
@@ -189,22 +89,23 @@ const MintModalContent = () => {
 
   return (
     <>
-      <p>{message}</p>
-      {tokenId && <p>Your minted NFT Id is ${tokenId}</p>}
+      <p>{isMintError && `Mint error: ${mintError.message}`}</p>
+      <p>{isFetchError && `Fetch error: ${fetchError.message}`}</p>
+      <p>{mintStatus && messages[mintStatus]}</p>
       {price && <p>Your current mint price (without fees): {price} ETH</p>}
       <Image
         className="w-[50vw] md:w-[20vw] rounded-2xl"
-        src={picture}
+        src={isError ? "Error.png" : nftPicture}
         alt="NFT Preview"
       />
       <div className="flex justify-center gap-4">
-        {canMint && (
+        {canMint && price && (
           <button
             disabled={isPending}
             className="modal-button"
-            onClick={handleMint}
+            onClick={handleMint({ price, chainId })}
           >
-            {isPending ? "Pending..." : isConfirming ? "Confirming..." : "Mint"}
+            {isPending ? "Pending..." : "Mint"}
           </button>
         )}
       </div>

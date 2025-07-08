@@ -1,4 +1,6 @@
 import React from "react";
+import Image from "next/image";
+
 import { ButtonProps } from "./Button";
 
 export interface ButtonWithAvatarProps extends ButtonProps {
@@ -29,7 +31,7 @@ const ButtonWithAvatar: React.FC<ButtonWithAvatarProps> = ({
       ) : (
         <>
           {avatar && (
-            <img
+            <Image
               src={avatar}
               alt="Avatar"
               className="w-6 h-6 rounded-full mr-1.5"
