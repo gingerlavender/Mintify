@@ -1,26 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Config, WagmiProvider, http } from "wagmi";
-import { mainnet, optimism, optimismSepolia } from "wagmi/chains";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { mainnet, optimism, optimismSepolia } from "wagmi/chains";
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [config, setConfig] = useState<Config>();
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        queryCache: new QueryCache({
-          onError: (error) => console.error(error),
-        }),
-      })
-  );
+  const [queryClient] = useState(() => new QueryClient());
 
   useEffect(() => {
     const cfg = getDefaultConfig({

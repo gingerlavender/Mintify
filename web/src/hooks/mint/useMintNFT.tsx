@@ -62,11 +62,15 @@ export const useMintNFT = () => {
 const useSignMintMessage = () => {
   return useMutation({
     mutationFn: async ({ chainId }: { chainId: number }) => {
-      const result = await apiRequest<MintArgsWithSignature>("api/mint", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ type: "mint", chainId }),
-      });
+      const result = await apiRequest<MintArgsWithSignature>(
+        "api/mint",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ type: "mint", chainId }),
+        },
+        { logErrors: false }
+      );
       if (!result.success) {
         throw new Error(result.error);
       }
@@ -112,11 +116,15 @@ const useSaveToDatabase = () => {
       tokenId: bigint;
       chainId: number;
     }) => {
-      const result = await apiRequest("/api/mint/save", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ tokenId: tokenId.toString(), chainId }),
-      });
+      const result = await apiRequest(
+        "/api/mint/save",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ tokenId: tokenId.toString(), chainId }),
+        },
+        { logErrors: false }
+      );
       if (!result.success)
         throw new Error(`Saving to DB failed: ${result.error}`);
     },
