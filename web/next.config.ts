@@ -27,6 +27,11 @@ const nextConfig: NextConfig = {
         hostname: "cloudflare-ipfs.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "euc.li",
+        pathname: "/**",
+      },
     ],
   },
 };
