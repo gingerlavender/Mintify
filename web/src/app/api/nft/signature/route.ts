@@ -21,13 +21,13 @@ import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
 import {
   ChainId,
-  MINT_ACTIONS,
+  MintAction,
   MintArgsWithSignature,
   RemintArgsWithSignature,
-} from "@/types/mint";
+} from "@/types/nft/mint";
 
 const MintRequestSchema = z.object({
-  action: z.enum(MINT_ACTIONS),
+  action: z.nativeEnum(MintAction),
   chainId: z.number().refine((id): id is ChainId => id in publicClients, {
     message: "Invalid chain id",
   }),
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     let message: Hex;
     let tokenId: string | undefined = undefined;
 
-    if (action === "remint") {
+    if (action === MintAction.Remint) {
       const nft = await prisma.personalNFT.findUnique({
         where: {
           userId: user.id,

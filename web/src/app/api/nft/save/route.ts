@@ -15,7 +15,8 @@ import {
   assertValidAddress,
   assertValidConnection,
 } from "@/lib/api/validation";
-import { ChainId } from "@/types/mint";
+
+import { ChainId } from "@/types/nft/mint";
 
 const TokenSaveRequestSchema = z.object({
   tokenId: z

@@ -1,4 +1,4 @@
-import { MintAction } from "@/types/mint";
+import { MintAction } from "@/types/nft/state";
 
 import { useMintNFT } from "./useMintNFT";
 import { useRemintNFT } from "./useRemintNFT";

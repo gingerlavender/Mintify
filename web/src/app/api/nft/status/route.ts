@@ -18,7 +18,9 @@ import { publicClients } from "@/lib/public-clients";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
-import { ChainId, MintStatusInfo, NFTMetadata } from "@/types/mint";
+import { ChainId } from "@/types/nft/mint";
+import { NFTInfo, NFTStatus } from "@/types/nft/state";
+import { NFTMetadata } from "@/types/nft/metadata";
 
 const MintStatusRequestSchema = z.object({
   chainId: z.number().refine((id): id is ChainId => id in publicClients, {
@@ -68,8 +70,8 @@ export async function POST(req: Request) {
     }
 
     if (!nft) {
-      return NextResponse.json<MintStatusInfo>({
-        mintStatus: "not_minted",
+      return NextResponse.json<NFTInfo>({
+        nftStatus: NFTStatus.NotMinted,
         nextPrice,
       });
     }
@@ -96,14 +98,14 @@ export async function POST(req: Request) {
     });
 
     if (currentOwner != user.wallet) {
-      return NextResponse.json<MintStatusInfo>({
-        mintStatus: "token_transferred",
+      return NextResponse.json<NFTInfo>({
+        nftStatus: NFTStatus.Transferred,
         image,
       });
     }
 
-    return NextResponse.json<MintStatusInfo>({
-      mintStatus: "minted",
+    return NextResponse.json<NFTInfo>({
+      nftStatus: NFTStatus.Minted,
       image,
       nextPrice,
     });

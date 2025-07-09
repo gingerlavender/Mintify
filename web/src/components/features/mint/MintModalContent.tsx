@@ -6,17 +6,18 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiRequest } from "@/lib/api/requests";
 
-import { MintAction, MintStatus, MintStatusInfo } from "@/types/mint";
+import { MintAction } from "@/types/nft/mint";
+import { NFTStatus, NFTInfo } from "@/types/nft/state";
 
 import { useMintModal } from "@/hooks/modal/useMintModal";
 import { useMintAction } from "@/hooks/nft/mint/useMintAction";
 
-const messages: Record<MintStatus, string> = {
-  not_minted:
+const messages: Record<NFTStatus, string> = {
+  [NFTStatus.NotMinted]:
     "This is going to be your first mint! Let's sooner find out what you'll get!",
-  minted:
+  [NFTStatus.Minted]:
     "You can see yout current NFT below. Remember that you can remint it any time!",
-  token_transferred:
+  [NFTStatus.Transferred]:
     "Here is your minted NFT, but you cannot remint anymore as it has been transferred.",
 };
 
@@ -28,14 +29,14 @@ const MintModalContent = () => {
   const queryClient = useQueryClient();
 
   const {
-    data: mintStatusInfo,
+    data: nftInfo,
     isLoading,
     isError: isFetchError,
     error: fetchError,
   } = useQuery({
     queryKey: ["mintStatus", chainId],
     queryFn: async () => {
-      const result = await apiRequest<MintStatusInfo>("api/nft/status", {
+      const result = await apiRequest<NFTInfo>("api/nft/status", {
         headers: { "content-type": "application/json" },
         method: "POST",
         body: JSON.stringify({ chainId }),
@@ -48,9 +49,9 @@ const MintModalContent = () => {
     staleTime: Infinity,
   });
 
-  const mintStatus = mintStatusInfo?.mintStatus;
+  const nftStatus = nftInfo?.nftStatus;
   const mintAction: MintAction =
-    mintStatus === "not_minted" ? "mint" : "remint";
+    nftStatus === NFTStatus.NotMinted ? MintAction.Mint : MintAction.Remint;
 
   const {
     mutate: mint,
@@ -62,12 +63,12 @@ const MintModalContent = () => {
   const isError = isFetchError || isMintError;
 
   const canMint =
-    !isError && !!mintStatus && mintStatus !== "token_transferred";
-  const price = canMint ? mintStatusInfo?.nextPrice : undefined;
+    !isError && !!nftStatus && nftStatus !== NFTStatus.Transferred;
+  const price = canMint ? nftInfo?.nextPrice : undefined;
   const nftPicture =
-    !mintStatusInfo || mintStatus === "not_minted"
+    !nftInfo || nftStatus === NFTStatus.NotMinted
       ? "NFTPlaceholder.png"
-      : mintStatusInfo.image;
+      : nftInfo.image;
 
   const handleMint = () => {
     if (price) {
@@ -99,7 +100,7 @@ const MintModalContent = () => {
         </p>
       )}
       {isFetchError && <p>Fetch error: {fetchError.message}</p>}
-      {!isError && mintStatus && <p>{messages[mintStatus]}</p>}
+      {!isError && nftStatus && <p>{messages[nftStatus]}</p>}
       {price && <p>Your current mint price (without fees): {price} ETH</p>}
       <Image
         className="w-[50vw] md:w-[20vw] rounded-2xl"

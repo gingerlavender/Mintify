@@ -7,7 +7,7 @@ import { Config, useConfig } from "wagmi";
 
 import { apiRequest } from "@/lib/api/requests";
 
-import { MintArgsWithSignature } from "@/types/mint";
+import { MintArgsWithSignature } from "@/types/nft/state";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 

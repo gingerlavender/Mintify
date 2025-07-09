@@ -5,7 +5,7 @@ import {
   MintAction,
   MintArgsWithSignature,
   RemintArgsWithSignature,
-} from "@/types/mint";
+} from "@/types/nft/mint";
 
 export const useSignMintAction = () => {
   const mutation = useMutation({
@@ -38,7 +38,7 @@ export const useSignMintAction = () => {
   const signMint = async (chainId: number): Promise<MintArgsWithSignature> => {
     return (await mutation.mutateAsync({
       chainId,
-      action: "mint",
+      action: MintAction.Mint,
     })) as MintArgsWithSignature;
   };
 
@@ -47,7 +47,7 @@ export const useSignMintAction = () => {
   ): Promise<RemintArgsWithSignature> => {
     return (await mutation.mutateAsync({
       chainId,
-      action: "remint",
+      action: MintAction.Remint,
     })) as RemintArgsWithSignature;
   };
 
