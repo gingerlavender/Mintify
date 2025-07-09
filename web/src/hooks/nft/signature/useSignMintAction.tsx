@@ -31,10 +31,7 @@ export const useSignMintAction = () => {
         throw new Error(result.error);
       }
 
-      if (action === "mint") {
-        return result.data as MintArgsWithSignature;
-      }
-      return result.data as RemintArgsWithSignature;
+      return result.data;
     },
   });
 

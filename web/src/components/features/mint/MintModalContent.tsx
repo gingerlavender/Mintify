@@ -20,12 +20,14 @@ const messages: Record<MintStatus, string> = {
     "Here is your minted NFT, but you cannot remint anymore as it has been transferred.",
 };
 
+const useHook = () => {};
+
 const MintModalContent = () => {
   const { closeMintModal } = useMintModal();
 
-  const chainId = useChainId();
-
   const queryClient = useQueryClient();
+
+  const chainId = queryClient ? useHook() : 3;
 
   const {
     data: mintStatusInfo,
@@ -52,13 +54,6 @@ const MintModalContent = () => {
   const mintAction: MintAction =
     mintStatus === "not_minted" ? "mint" : "remint";
 
-  const canMint = mintStatus !== "token_transferred";
-  const price = canMint ? mintStatusInfo?.nextPrice : undefined;
-  const nftPicture =
-    !mintStatusInfo || mintStatus === "not_minted"
-      ? "NFTPlaceholder.png"
-      : mintStatusInfo.tokenURI;
-
   const {
     mutate: mint,
     isPending,
@@ -67,6 +62,14 @@ const MintModalContent = () => {
   } = useMintAction(mintAction);
 
   const isError = isFetchError || isMintError;
+
+  const canMint =
+    !isError && !!mintStatus && mintStatus !== "token_transferred";
+  const price = canMint ? mintStatusInfo?.nextPrice : undefined;
+  const nftPicture =
+    !mintStatusInfo || mintStatus === "not_minted"
+      ? "NFTPlaceholder.png"
+      : mintStatusInfo.tokenURI;
 
   const handleMint = () => {
     if (price) {
@@ -99,24 +102,20 @@ const MintModalContent = () => {
       )}
       {isFetchError && <p>Fetch error: {fetchError.message}</p>}
       {!isError && mintStatus && <p>{messages[mintStatus]}</p>}
-      {!isError && price && (
-        <p>Your current mint price (without fees): {price} ETH</p>
-      )}
+      {price && <p>Your current mint price (without fees): {price} ETH</p>}
       <Image
         className="w-[50vw] md:w-[20vw] rounded-2xl"
         src={isError ? "Error.png" : nftPicture}
         alt="NFT Preview"
       />
       <div className="flex justify-center gap-4">
-        {canMint && price && (
-          <button
-            disabled={isPending}
-            className="modal-button"
-            onClick={isError ? closeMintModal : handleMint}
-          >
-            {isPending ? "Pending..." : isError ? "Close" : "Mint"}
-          </button>
-        )}
+        <button
+          disabled={isPending}
+          className="modal-button"
+          onClick={canMint ? handleMint : closeMintModal}
+        >
+          {isPending ? "Pending..." : canMint ? "Mint" : "Close"}
+        </button>
       </div>
     </>
   );
