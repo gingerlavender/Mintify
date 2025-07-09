@@ -19,7 +19,12 @@ import {
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
-import { ChainId, MINT_ACTIONS, MintArgsWithSignature } from "@/types/mint";
+import {
+  ChainId,
+  MINT_ACTIONS,
+  MintArgsWithSignature,
+  RemintArgsWithSignature,
+} from "@/types/mint";
 
 const MintRequestSchema = z.object({
   action: z.enum(MINT_ACTIONS),
@@ -55,6 +60,7 @@ export async function POST(req: Request) {
     const tokenURI = createURIForUser(user);
 
     let message: Hex;
+    let tokenId: string | undefined = undefined;
 
     if (action === "remint") {
       const nft = await prisma.personalNFT.findUnique({
@@ -67,9 +73,11 @@ export async function POST(req: Request) {
         throw new PermissionError("You cannot remint before initial mint");
       }
 
+      tokenId = nft.tokenId;
+
       message = encodePacked(
         ["uint256", "string", "uint256", "uint256"],
-        [BigInt(nft.tokenId), tokenURI, nonce, BigInt(chainId)]
+        [BigInt(tokenId), tokenURI, nonce, BigInt(chainId)]
       );
     } else {
       message = encodePacked(
@@ -90,11 +98,12 @@ export async function POST(req: Request) {
       throw new Error("Cannot retrieve v from signature");
     }
 
-    return NextResponse.json<MintArgsWithSignature>({
+    return NextResponse.json<MintArgsWithSignature | RemintArgsWithSignature>({
       tokenURI,
       v: Number(v),
       r,
       s,
+      ...(tokenId ? { tokenId } : {}),
     });
   } catch (error) {
     console.error(error);
