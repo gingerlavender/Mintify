@@ -5,7 +5,7 @@ import { writeContract, waitForTransactionReceipt } from "wagmi/actions";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
-import { RemintArgsWithSignature } from "@/types/nft/state";
+import { RemintArgsWithSignature } from "@/types/nft/mint";
 
 import { useSignMintAction } from "../signature/useSignMintAction";
 
