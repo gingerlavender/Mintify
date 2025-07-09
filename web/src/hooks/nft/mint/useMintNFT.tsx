@@ -11,11 +11,14 @@ import { MintArgsWithSignature } from "@/types/mint";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
+import { useSignMintAction } from "../signature/useSignMintAction";
+
 export const useMintNFT = () => {
   const config = useConfig();
 
-  const signMintMessage = useSignMintMessage();
-  const safeMintWithSignature = useSafeMintWithSignature(config);
+  const { signMint } = useSignMintAction();
+  const mintWithSignature = useSafeMintWithSignature(config);
+
   const saveToDatabase = useSaveToDatabase();
 
   return useMutation({
@@ -26,9 +29,9 @@ export const useMintNFT = () => {
       price: number;
       chainId: number;
     }) => {
-      const args = await signMintMessage.mutateAsync({ chainId });
+      const args = await signMint(chainId);
 
-      const hash = await safeMintWithSignature.mutateAsync({
+      const hash = await mintWithSignature.mutateAsync({
         args,
         price,
         chainId,
@@ -59,26 +62,6 @@ export const useMintNFT = () => {
   });
 };
 
-const useSignMintMessage = () => {
-  return useMutation({
-    mutationFn: async ({ chainId }: { chainId: number }) => {
-      const result = await apiRequest<MintArgsWithSignature>(
-        "api/mint",
-        {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ type: "mint", chainId }),
-        },
-        { logErrors: false }
-      );
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      return result.data;
-    },
-  });
-};
-
 const useSafeMintWithSignature = (config: Config) => {
   return useMutation({
     mutationFn: async ({
@@ -99,7 +82,7 @@ const useSafeMintWithSignature = (config: Config) => {
         address: mintifyAddress,
         abi: mintifyAbi,
         functionName: "safeMintWithSignature",
-        args: [args.tokenURI, Number(args.v), args.r, args.s],
+        args: [args.tokenURI, args.v, args.r, args.s],
         value: parseEther(price.toString()),
         chainId,
       });
@@ -117,7 +100,7 @@ const useSaveToDatabase = () => {
       chainId: number;
     }) => {
       const result = await apiRequest(
-        "/api/mint/save",
+        "/api/nft/save",
         {
           method: "POST",
           headers: { "content-type": "application/json" },

@@ -1,6 +1,10 @@
 import { publicClients } from "@/lib/public-clients";
+import { Hex } from "viem";
 
 export type ChainId = keyof typeof publicClients;
+
+export const MINT_ACTIONS = ["mint", "remint"] as const;
+export type MintAction = (typeof MINT_ACTIONS)[number];
 
 export type MintStatus = "not_minted" | "minted" | "token_transferred";
 
@@ -20,9 +24,9 @@ export type MintStatusInfo =
     };
 
 interface Signature {
-  v: string;
-  r: `0x${string}`;
-  s: `0x${string}`;
+  v: number;
+  r: Hex;
+  s: Hex;
 }
 
 interface MintArgs {

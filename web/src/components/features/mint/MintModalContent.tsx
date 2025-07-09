@@ -6,10 +6,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiRequest } from "@/lib/api/requests";
 
-import { MintStatus, MintStatusInfo } from "@/types/mint";
+import { MintAction, MintStatus, MintStatusInfo } from "@/types/mint";
 
-import { useMintNFT } from "@/hooks/mint/useMintNFT";
 import { useMintModal } from "@/hooks/modal/useMintModal";
+import { useMintAction } from "@/hooks/nft/mint/useMintAction";
 
 const messages: Record<MintStatus, string> = {
   not_minted:
@@ -28,13 +28,6 @@ const MintModalContent = () => {
   const queryClient = useQueryClient();
 
   const {
-    mutate: mint,
-    isPending,
-    isError: isMintError,
-    error: mintError,
-  } = useMintNFT();
-
-  const {
     data: mintStatusInfo,
     isLoading,
     isError: isFetchError,
@@ -42,7 +35,7 @@ const MintModalContent = () => {
   } = useQuery({
     queryKey: ["mintStatus", chainId],
     queryFn: async () => {
-      const result = await apiRequest<MintStatusInfo>("api/mint/status", {
+      const result = await apiRequest<MintStatusInfo>("api/nft/status", {
         headers: { "content-type": "application/json" },
         method: "POST",
         body: JSON.stringify({ chainId }),
@@ -55,9 +48,9 @@ const MintModalContent = () => {
     staleTime: Infinity,
   });
 
-  const isError = isFetchError || isMintError;
-
   const mintStatus = mintStatusInfo?.mintStatus;
+  const mintAction: MintAction =
+    mintStatus === "not_minted" ? "mint" : "remint";
 
   const canMint = mintStatus !== "token_transferred";
   const price = canMint ? mintStatusInfo?.nextPrice : undefined;
@@ -65,6 +58,15 @@ const MintModalContent = () => {
     !mintStatusInfo || mintStatus === "not_minted"
       ? "NFTPlaceholder.png"
       : mintStatusInfo.tokenURI;
+
+  const {
+    mutate: mint,
+    isPending,
+    isError: isMintError,
+    error: mintError,
+  } = useMintAction(mintAction);
+
+  const isError = isFetchError || isMintError;
 
   const handleMint = () => {
     if (price) {

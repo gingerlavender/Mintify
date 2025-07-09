@@ -47,7 +47,7 @@ contract Mintify is
         uint256 indexed _tokenId,
         string _tokenURI
     );
-    event URIUpdated(uint256 indexed tokenId, string _newTokenURI);
+    event URIUpdated(uint256 indexed _tokenId, string _newTokenURI);
 
     modifier costs(uint256 _cost) {
         require(msg.value == _cost, IncorrectValue());
