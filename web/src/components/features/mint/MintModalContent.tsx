@@ -67,7 +67,7 @@ const MintModalContent = () => {
   const nftPicture =
     !mintStatusInfo || mintStatus === "not_minted"
       ? "NFTPlaceholder.png"
-      : mintStatusInfo.tokenURI;
+      : mintStatusInfo.image;
 
   const handleMint = () => {
     if (price) {

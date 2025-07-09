@@ -37,11 +37,22 @@ export class PermissionError extends Error {
   }
 }
 
+export class RequestError extends Error {
+  constructor(
+    message: string,
+    public statusCode = 400
+  ) {
+    super(message);
+    this.name = "RequestError";
+  }
+}
+
 export function handleCommonErrors(error: unknown) {
   if (
     error instanceof AuthError ||
     error instanceof ValidationError ||
-    error instanceof PermissionError
+    error instanceof PermissionError ||
+    error instanceof RequestError
   ) {
     return NextResponse.json(
       { error: error.message },

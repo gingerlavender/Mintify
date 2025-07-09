@@ -1,21 +1,24 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { formatEther } from "viem";
 
+import { prisma } from "@/lib/prisma";
 import {
   assertValidAddress,
   assertValidConnection,
 } from "@/lib/api/validation";
-import { ChainId, MintStatusInfo } from "@/types/mint";
-
-import { publicClients } from "@/lib/public-clients";
-import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 import {
   handleCommonErrors,
   handleContractErrors,
   handleDatabaseErrors,
+  RequestError,
 } from "@/lib/api/error-handling";
+import { apiRequest } from "@/lib/api/requests";
+import { publicClients } from "@/lib/public-clients";
+
+import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
+
+import { ChainId, MintStatusInfo, NFTMetadata } from "@/types/mint";
 
 const MintStatusRequestSchema = z.object({
   chainId: z.number().refine((id): id is ChainId => id in publicClients, {
@@ -78,6 +81,13 @@ export async function POST(req: Request) {
       args: [BigInt(nft.tokenId)],
     });
 
+    const result = await apiRequest<NFTMetadata>(tokenURI);
+    if (!result.success) {
+      throw new RequestError("Cannot fetch metadata successfully");
+    }
+
+    const { image } = result.data;
+
     const currentOwner = await publicClient.readContract({
       address: mintifyAddress,
       abi: mintifyAbi,
@@ -88,13 +98,13 @@ export async function POST(req: Request) {
     if (currentOwner != user.wallet) {
       return NextResponse.json<MintStatusInfo>({
         mintStatus: "token_transferred",
-        tokenURI,
+        image,
       });
     }
 
     return NextResponse.json<MintStatusInfo>({
       mintStatus: "minted",
-      tokenURI,
+      image,
       nextPrice,
     });
   } catch (error) {

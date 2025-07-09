@@ -15,13 +15,19 @@ export type MintStatusInfo =
     }
   | {
       mintStatus: "minted";
-      tokenURI: string;
+      image: string;
       nextPrice: number;
     }
   | {
       mintStatus: "token_transferred";
-      tokenURI: string;
+      image: string;
     };
+
+export interface NFTMetadata {
+  name: string;
+  description: string;
+  image: string;
+}
 
 interface Signature {
   v: number;
