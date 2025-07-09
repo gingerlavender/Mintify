@@ -100,14 +100,12 @@ export async function POST(req: Request) {
     if (currentOwner != user.wallet) {
       return NextResponse.json<NFTInfo>({
         nftStatus: NFTStatus.Transferred,
-        tokenId: nft.tokenId,
         image,
       });
     }
 
     return NextResponse.json<NFTInfo>({
       nftStatus: NFTStatus.Minted,
-      tokenId: nft.tokenId,
       image,
       nextPrice,
     });

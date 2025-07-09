@@ -11,12 +11,10 @@ export type NFTInfo =
     }
   | {
       nftStatus: NFTStatus.Minted;
-      tokenId: string;
       image: string;
       nextPrice: number;
     }
   | {
       nftStatus: NFTStatus.Transferred;
-      tokenId: string;
       image: string;
     };
