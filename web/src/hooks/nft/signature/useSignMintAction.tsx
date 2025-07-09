@@ -31,8 +31,6 @@ export const useSignMintAction = () => {
         throw new Error(result.error);
       }
 
-      console.log("response received: ", result.data);
-
       return result.data;
     },
   });
