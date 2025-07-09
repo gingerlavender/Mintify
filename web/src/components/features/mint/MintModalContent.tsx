@@ -69,6 +69,10 @@ const MintModalContent = () => {
     !nftInfo || nftStatus === NFTStatus.NotMinted
       ? "NFTPlaceholder.png"
       : nftInfo.image;
+  const tokenId =
+    nftStatus && nftStatus !== NFTStatus.NotMinted
+      ? nftInfo.tokenId
+      : undefined;
 
   const handleMint = () => {
     if (price) {
@@ -101,6 +105,7 @@ const MintModalContent = () => {
       )}
       {isFetchError && <p>Fetch error: {fetchError.message}</p>}
       {!isError && nftStatus && <p>{messages[nftStatus]}</p>}
+      {!isError && tokenId && <p>Your unique NFT id: #{tokenId}</p>}
       {price && <p>Your current mint price (without fees): {price} ETH</p>}
       <Image
         className="w-[50vw] md:w-[20vw] rounded-2xl"
@@ -113,7 +118,13 @@ const MintModalContent = () => {
           className="modal-button"
           onClick={canMint ? handleMint : closeMintModal}
         >
-          {isPending ? "Pending..." : canMint ? "Mint" : "Close"}
+          {isPending
+            ? "Pending..."
+            : canMint
+              ? nftStatus === NFTStatus.NotMinted
+                ? "Mint"
+                : "Remint"
+              : "Close"}
         </button>
       </div>
     </>
