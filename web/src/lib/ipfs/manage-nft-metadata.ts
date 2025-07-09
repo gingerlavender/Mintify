@@ -6,6 +6,8 @@ import { pinata, pinataGateway } from "./pinata-client";
 import { generateImage } from "../image/image-generation";
 import { parsePinataError } from "../errors";
 
+const METADATA_SUFFIX = "Metadata.json" as const;
+
 export const uploadNFTMetadata = async (user: User) => {
   const imageUrl = generateImage();
 
@@ -19,14 +21,12 @@ export const uploadNFTMetadata = async (user: User) => {
     };
     const upload = await pinata.upload.public
       .json(metadata)
-      .name(`${user.name}Metadata.json`)
+      .name(`${user.name}${METADATA_SUFFIX}`)
       .keyvalues({ userId: user.id });
-
-    const tokenURI = buildPinataURL(upload.cid);
 
     await deleteOutdatedNFTMetadata(user, { actualCid: upload.cid });
 
-    return tokenURI;
+    return upload.cid;
   } catch (error) {
     const e = parsePinataError(error);
     throw e;

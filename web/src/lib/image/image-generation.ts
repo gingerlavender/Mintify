@@ -1,3 +1,3 @@
 export const generateImage = () => {
-  return "bafkreicz6mvnygsj272scqf2qpdsptn4hqhbs2qmbft4cbno7xat3uqboy";
+  return "bafkreib2imobphpiera2ldobkxdcfij4e7clkc3z7ftghwsng357t4gdka";
 };

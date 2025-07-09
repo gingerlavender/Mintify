@@ -108,6 +108,7 @@ export async function POST(req: Request) {
       nextPrice,
     });
   } catch (error) {
+    console.error(error);
     return (
       handlePrismaErrors(error) ??
       handleViemErrors(error) ??
