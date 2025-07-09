@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Config, WagmiProvider, http } from "wagmi";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { mainnet, optimism, optimismSepolia } from "wagmi/chains";
+import { optimism, optimismSepolia } from "wagmi/chains";
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [config, setConfig] = useState<Config>();
@@ -17,7 +17,6 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       projectId: `${process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID}`,
       chains: [
         optimism,
-        mainnet,
         ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS == "true"
           ? [optimismSepolia]
           : []),
