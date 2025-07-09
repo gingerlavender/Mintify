@@ -1,7 +1,8 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { AuthOptions } from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
-import { prisma } from "./prisma";
+
+import { prisma } from "./prisma-client";
 
 export const authOptions: AuthOptions = {
   pages: {
@@ -17,12 +18,14 @@ export const authOptions: AuthOptions = {
       },
     }),
   ],
+  //
   callbacks: {
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
         session.user.wallet = (user.wallet as `0x${string}`) ?? null;
       }
+
       return session;
     },
   },

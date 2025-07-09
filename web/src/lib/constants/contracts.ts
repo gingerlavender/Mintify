@@ -1,0 +1,2 @@
+export const MINTIFY_CONTRACT_ADDRESS =
+  "0x61DCaB7aAF86804a492E5Ee093ae1bf0Ed72c706" as const;

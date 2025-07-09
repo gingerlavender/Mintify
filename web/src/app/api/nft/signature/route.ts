@@ -3,19 +3,21 @@ import { NextResponse } from "next/server";
 import { encodePacked, Hex, keccak256, parseSignature } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
-import { prisma } from "@/lib/prisma";
-import { createURIForUser } from "@/lib/image-generation";
-import { publicClients } from "@/lib/public-clients";
+import { prisma } from "@/lib/prisma-client";
+import { publicClients } from "@/lib/viem/public-clients";
+import { uploadNFTMetadata } from "@/lib/ipfs/manage-nft-metadata";
 import {
   assertValidAddress,
   assertValidConnection,
 } from "@/lib/api/validation";
+import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import {
   handleCommonErrors,
-  handleContractErrors,
-  handleDatabaseErrors,
+  handleViemErrors,
+  handlePrismaErrors,
   PermissionError,
-} from "@/lib/api/error-handling";
+  handlePinataErrors,
+} from "@/lib/errors";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
@@ -40,9 +42,6 @@ export async function POST(req: Request) {
 
     const user = await assertValidConnection();
     const walletAddress = assertValidAddress(user.wallet);
-    const mintifyAddress = assertValidAddress(
-      process.env.NEXT_PUBLIC_MINTIFY_ADDRESS
-    );
 
     const publicClient = publicClients[chainId]!;
 
@@ -51,13 +50,13 @@ export async function POST(req: Request) {
     );
 
     const nonce = await publicClient.readContract({
-      address: mintifyAddress,
+      address: MINTIFY_CONTRACT_ADDRESS,
       abi: mintifyAbi,
       functionName: "tokenUriUpdates",
       args: [walletAddress],
     });
 
-    const tokenURI = createURIForUser(user);
+    const tokenURI = await uploadNFTMetadata(user);
 
     let message: Hex;
     let tokenId: string | undefined = undefined;
@@ -108,8 +107,9 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error(error);
     return (
-      handleDatabaseErrors(error) ??
-      handleContractErrors(error) ??
+      handlePinataErrors(error) ??
+      handlePrismaErrors(error) ??
+      handleViemErrors(error) ??
       handleCommonErrors(error)
     );
   }

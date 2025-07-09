@@ -3,14 +3,15 @@ import { NextResponse } from "next/server";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma-client";
+import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import {
   handleCommonErrors,
-  handleContractErrors,
-  handleDatabaseErrors,
+  handleViemErrors,
+  handlePrismaErrors,
   PermissionError,
-} from "@/lib/api/error-handling";
-import { publicClients } from "@/lib/public-clients";
+} from "@/lib/errors";
+import { publicClients } from "@/lib/viem/public-clients";
 import {
   assertValidAddress,
   assertValidConnection,
@@ -37,14 +38,11 @@ export async function POST(req: Request) {
 
     const user = await assertValidConnection();
     const walletAddress = assertValidAddress(user.wallet);
-    const mintifyAddress = assertValidAddress(
-      process.env.NEXT_PUBLIC_MINTIFY_ADDRESS
-    );
 
     const publicClient = publicClients[chainId]!;
 
     const tokenOwner = await publicClient.readContract({
-      address: mintifyAddress,
+      address: MINTIFY_CONTRACT_ADDRESS,
       abi: mintifyAbi,
       functionName: "ownerOf",
       args: [BigInt(tokenId)],
@@ -65,8 +63,8 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error(error);
     return (
-      handleContractErrors(error) ??
-      handleDatabaseErrors(error) ??
+      handlePrismaErrors(error) ??
+      handleViemErrors(error) ??
       handleCommonErrors(error)
     );
   }

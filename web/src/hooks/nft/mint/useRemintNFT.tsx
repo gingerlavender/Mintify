@@ -1,7 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
-import { isAddress, parseEther } from "viem";
+import { parseEther } from "viem";
 import { Config, useConfig } from "wagmi";
 import { writeContract, waitForTransactionReceipt } from "wagmi/actions";
+
+import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
@@ -53,13 +55,8 @@ const useRemintWithSignature = (config: Config) => {
       price: number;
       chainId: number;
     }) => {
-      const mintifyAddress = process.env.NEXT_PUBLIC_MINTIFY_ADDRESS;
-      if (!mintifyAddress || !isAddress(mintifyAddress)) {
-        throw new Error("Missing or incorrect contract address");
-      }
-
       return await writeContract(config, {
-        address: mintifyAddress,
+        address: MINTIFY_CONTRACT_ADDRESS,
         abi: mintifyAbi,
         functionName: "updateTokenURIWithSignature",
         args: [

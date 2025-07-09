@@ -2,13 +2,13 @@ import { z } from "zod";
 import { NextResponse } from "next/server";
 import { isAddress } from "viem";
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma-client";
 import { assertValidConnection } from "@/lib/api/validation";
 import {
   handleCommonErrors,
-  handleDatabaseErrors,
+  handlePrismaErrors,
   PermissionError,
-} from "@/lib/api/error-handling";
+} from "@/lib/errors";
 
 const WalletLinkRequestSchema = z.object({
   walletAddress: z
@@ -35,6 +35,6 @@ export async function POST(req: Request) {
     return NextResponse.json({});
   } catch (error) {
     console.error(error);
-    return handleDatabaseErrors(error) ?? handleCommonErrors(error);
+    return handlePrismaErrors(error) ?? handleCommonErrors(error);
   }
 }

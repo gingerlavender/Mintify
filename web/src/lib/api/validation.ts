@@ -2,8 +2,8 @@ import { getServerSession } from "next-auth";
 import { isAddress } from "viem";
 
 import { authOptions } from "../auth";
-import { prisma } from "@/lib/prisma";
-import { AuthError, ValidationError } from "./error-handling";
+import { prisma } from "../prisma-client";
+import { AuthError, ValidationError } from "../errors";
 
 export const assertValidConnection = async () => {
   const session = await getServerSession(authOptions);

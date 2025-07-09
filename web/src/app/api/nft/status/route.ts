@@ -2,19 +2,20 @@ import { z } from "zod";
 import { NextResponse } from "next/server";
 import { formatEther } from "viem";
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma-client";
 import {
   assertValidAddress,
   assertValidConnection,
 } from "@/lib/api/validation";
+import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import {
   handleCommonErrors,
-  handleContractErrors,
-  handleDatabaseErrors,
+  handleViemErrors,
+  handlePrismaErrors,
   RequestError,
-} from "@/lib/api/error-handling";
+} from "@/lib/errors";
 import { apiRequest } from "@/lib/api/requests";
-import { publicClients } from "@/lib/public-clients";
+import { publicClients } from "@/lib/viem/public-clients";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
@@ -35,14 +36,11 @@ export async function POST(req: Request) {
 
     const user = await assertValidConnection();
     const walletAddress = assertValidAddress(user.wallet);
-    const mintifyAddress = assertValidAddress(
-      process.env.NEXT_PUBLIC_MINTIFY_ADDRESS
-    );
 
     const publicClient = publicClients[chainId]!;
 
     const tokenUriUpdates = await publicClient.readContract({
-      address: mintifyAddress,
+      address: MINTIFY_CONTRACT_ADDRESS,
       abi: mintifyAbi,
       functionName: "tokenUriUpdates",
       args: [walletAddress],
@@ -51,7 +49,7 @@ export async function POST(req: Request) {
     const nextPrice = Number(
       formatEther(
         await publicClient.readContract({
-          address: mintifyAddress,
+          address: MINTIFY_CONTRACT_ADDRESS,
           abi: mintifyAbi,
           functionName: "getPrice",
           args: [walletAddress],
@@ -77,7 +75,7 @@ export async function POST(req: Request) {
     }
 
     const tokenURI = await publicClient.readContract({
-      address: mintifyAddress,
+      address: MINTIFY_CONTRACT_ADDRESS,
       abi: mintifyAbi,
       functionName: "tokenURI",
       args: [BigInt(nft.tokenId)],
@@ -91,7 +89,7 @@ export async function POST(req: Request) {
     const { image } = result.data;
 
     const currentOwner = await publicClient.readContract({
-      address: mintifyAddress,
+      address: MINTIFY_CONTRACT_ADDRESS,
       abi: mintifyAbi,
       functionName: "ownerOf",
       args: [BigInt(nft.tokenId)],
@@ -111,8 +109,8 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     return (
-      handleDatabaseErrors(error) ??
-      handleContractErrors(error) ??
+      handlePrismaErrors(error) ??
+      handleViemErrors(error) ??
       handleCommonErrors(error)
     );
   }

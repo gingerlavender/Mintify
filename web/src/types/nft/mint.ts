@@ -1,4 +1,4 @@
-import { publicClients } from "@/lib/public-clients";
+import { publicClients } from "@/lib/viem/public-clients";
 import { Hex } from "viem";
 
 export type ChainId = keyof typeof publicClients;
