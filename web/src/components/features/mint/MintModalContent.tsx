@@ -20,14 +20,12 @@ const messages: Record<MintStatus, string> = {
     "Here is your minted NFT, but you cannot remint anymore as it has been transferred.",
 };
 
-const useHook = () => {};
-
 const MintModalContent = () => {
   const { closeMintModal } = useMintModal();
 
-  const queryClient = useQueryClient();
+  const chainId = useChainId();
 
-  const chainId = queryClient ? useHook() : 3;
+  const queryClient = useQueryClient();
 
   const {
     data: mintStatusInfo,
