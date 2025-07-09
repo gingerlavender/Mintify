@@ -7,9 +7,10 @@ import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { optimism, optimismSepolia } from "wagmi/chains";
 
+const queryClient = new QueryClient();
+
 export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [config, setConfig] = useState<Config>();
-  const [queryClient] = useState(() => new QueryClient());
 
   useEffect(() => {
     const cfg = getDefaultConfig({
