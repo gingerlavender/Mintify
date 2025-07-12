@@ -23,7 +23,7 @@ import { ChainId } from "@/types/nft/mint";
 import { NFTInfo, NFTStatus } from "@/types/nft/state";
 import { NFTMetadata } from "@/types/nft/metadata";
 
-const MintStatusRequestSchema = z.object({
+const NFTInfoRequestSchema = z.object({
   chainId: z.number().refine((id): id is ChainId => id in publicClients, {
     message: "Invalid chain id",
   }),
@@ -32,7 +32,7 @@ const MintStatusRequestSchema = z.object({
 export async function POST(req: Request) {
   try {
     const rawBody = await req.json();
-    const { chainId } = MintStatusRequestSchema.parse(rawBody);
+    const { chainId } = NFTInfoRequestSchema.parse(rawBody);
 
     const user = await assertValidConnection();
     const walletAddress = assertValidAddress(user.wallet);

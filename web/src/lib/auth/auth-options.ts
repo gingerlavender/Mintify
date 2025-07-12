@@ -2,7 +2,8 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { AuthOptions } from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 
-import { prisma } from "./prisma-client";
+import { prisma } from "../prisma-client";
+import { spotifyCache } from "./spotify/cache";
 
 export const authOptions: AuthOptions = {
   pages: {
@@ -18,7 +19,6 @@ export const authOptions: AuthOptions = {
       },
     }),
   ],
-  //
   callbacks: {
     async session({ session, user }) {
       if (session.user) {
@@ -27,6 +27,11 @@ export const authOptions: AuthOptions = {
       }
 
       return session;
+    },
+  },
+  events: {
+    async signOut({ session }) {
+      spotifyCache.clear("accessToken", session.user.id);
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

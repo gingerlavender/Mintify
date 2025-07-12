@@ -10,7 +10,7 @@ import { MintAction } from "@/types/nft/mint";
 import { NFTStatus, NFTInfo } from "@/types/nft/state";
 
 import { useMintModal } from "@/hooks/modal/useMintModal";
-import { useMintAction } from "@/hooks/nft/mint/useMintAction";
+import { useMintAction } from "@/hooks/nft/useMintAction";
 
 const messages: Record<NFTStatus, string> = {
   [NFTStatus.NotMinted]:
@@ -36,7 +36,7 @@ const MintModalContent = () => {
   } = useQuery({
     queryKey: ["mintStatus", chainId],
     queryFn: async () => {
-      const result = await apiRequest<NFTInfo>("api/nft/status", {
+      const result = await apiRequest<NFTInfo>("api/nft/info", {
         headers: { "content-type": "application/json" },
         method: "POST",
         body: JSON.stringify({ chainId }),

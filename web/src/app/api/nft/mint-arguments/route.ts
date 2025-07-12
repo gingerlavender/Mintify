@@ -5,7 +5,7 @@ import { privateKeyToAccount } from "viem/accounts";
 
 import { prisma } from "@/lib/prisma-client";
 import { publicClients } from "@/lib/viem/public-clients";
-import { uploadNFTMetadata } from "@/lib/ipfs/manage-nft-metadata";
+import { createSpotifyBasedMetadata } from "@/lib/ipfs/manage-nft-metadata";
 import {
   assertValidAddress,
   assertValidConnection,
@@ -56,10 +56,9 @@ export async function POST(req: Request) {
       args: [walletAddress],
     });
 
-    const tokenURI = await uploadNFTMetadata(user);
-
     let message: Hex;
     let tokenId: string | undefined = undefined;
+    let tokenURI: string;
 
     if (action === MintAction.Remint) {
       const nft = await prisma.personalNFT.findUnique({
@@ -73,12 +72,15 @@ export async function POST(req: Request) {
       }
 
       tokenId = nft.tokenId;
+      tokenURI = await createSpotifyBasedMetadata(user);
 
       message = encodePacked(
         ["uint256", "string", "uint256", "uint256"],
         [BigInt(tokenId), tokenURI, nonce, BigInt(chainId)]
       );
     } else {
+      tokenURI = await createSpotifyBasedMetadata(user);
+
       message = encodePacked(
         ["address", "string", "uint256", "uint256"],
         [walletAddress, tokenURI, nonce, BigInt(chainId)]

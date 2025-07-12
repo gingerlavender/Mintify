@@ -11,13 +11,13 @@ import { MintArgsWithSignature } from "@/types/nft/mint";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
-import { useSignMintAction } from "../signature/useSignMintAction";
+import { useMintActionArguments } from "./useMintActionArguments";
 import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 
 export const useMintNFT = () => {
   const config = useConfig();
 
-  const { signMint } = useSignMintAction();
+  const { getMintArguments } = useMintActionArguments();
   const mintWithSignature = useSafeMintWithSignature(config);
 
   const saveToDatabase = useSaveToDatabase();
@@ -30,7 +30,7 @@ export const useMintNFT = () => {
       price: number;
       chainId: number;
     }) => {
-      const args = await signMint(chainId);
+      const args = await getMintArguments(chainId);
 
       const hash = await mintWithSignature.mutateAsync({
         args,

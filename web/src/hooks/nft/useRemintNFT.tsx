@@ -9,12 +9,12 @@ import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
 import { RemintArgsWithSignature } from "@/types/nft/mint";
 
-import { useSignMintAction } from "../signature/useSignMintAction";
+import { useMintActionArguments } from "./useMintActionArguments";
 
 export const useRemintNFT = () => {
   const config = useConfig();
 
-  const { signRemint } = useSignMintAction();
+  const { getRemintArguments } = useMintActionArguments();
   const remintWithSignature = useRemintWithSignature(config);
 
   return useMutation({
@@ -25,7 +25,7 @@ export const useRemintNFT = () => {
       price: number;
       chainId: number;
     }) => {
-      const args = await signRemint(chainId);
+      const args = await getRemintArguments(chainId);
 
       const hash = await remintWithSignature.mutateAsync({
         args,

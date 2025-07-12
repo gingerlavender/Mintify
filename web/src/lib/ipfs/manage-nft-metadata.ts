@@ -3,13 +3,15 @@ import { NFTMetadata } from "@/types/nft/metadata";
 import { User } from "@/generated/prisma";
 
 import { pinata, pinataGateway } from "./pinata-client";
-import { generateImage } from "../image/image-generation";
+import { generateSpotifyBasedImage } from "../image/image-generation";
 import { parsePinataError } from "../errors";
+import { spotifyCache } from "../auth/spotify/cache";
 
 const METADATA_SUFFIX = "Metadata.json" as const;
 
-export const uploadNFTMetadata = async (user: User) => {
-  const imageUrl = generateImage();
+export const createSpotifyBasedMetadata = async (user: User) => {
+  const spotifyAccessToken = await spotifyCache.accessToken(user.id);
+  const imageUrl = generateSpotifyBasedImage(spotifyAccessToken);
 
   try {
     const image = uploadImageToIPFS(imageUrl);

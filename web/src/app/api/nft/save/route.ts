@@ -19,7 +19,7 @@ import {
 
 import { ChainId } from "@/types/nft/mint";
 
-const TokenSaveRequestSchema = z.object({
+const NFTSaveRequestSchema = z.object({
   tokenId: z
     .string()
     .regex(/^\d+$/, { message: "Token id must be non-negative integer" })
@@ -34,7 +34,7 @@ const TokenSaveRequestSchema = z.object({
 export async function POST(req: Request) {
   try {
     const rawBody = await req.json();
-    const { tokenId, chainId } = TokenSaveRequestSchema.parse(rawBody);
+    const { tokenId, chainId } = NFTSaveRequestSchema.parse(rawBody);
 
     const user = await assertValidConnection();
     const walletAddress = assertValidAddress(user.wallet);

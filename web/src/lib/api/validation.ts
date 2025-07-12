@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { isAddress } from "viem";
 
-import { authOptions } from "../auth";
+import { authOptions } from "../auth/auth-options";
 import { prisma } from "../prisma-client";
 import { AuthError, ValidationError } from "../errors";
 
@@ -9,7 +9,7 @@ export const assertValidConnection = async () => {
   const session = await getServerSession(authOptions);
 
   if (!session || !session.user.id) {
-    throw new AuthError("Unauthorized");
+    throw new AuthError("Missing session or user id");
   }
 
   const user = await prisma.user.findUnique({
