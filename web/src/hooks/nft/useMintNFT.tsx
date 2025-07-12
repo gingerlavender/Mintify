@@ -5,6 +5,7 @@ import { waitForTransactionReceipt, writeContract } from "wagmi/actions";
 import { parseEther, parseEventLogs } from "viem";
 import { Config, useConfig } from "wagmi";
 
+import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import { apiRequest } from "@/lib/api/requests";
 
 import { MintArgsWithSignature } from "@/types/nft/mint";
@@ -12,15 +13,16 @@ import { MintArgsWithSignature } from "@/types/nft/mint";
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
 import { useMintActionArguments } from "./useMintActionArguments";
-import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
+import { useVerifyMintAction } from "./useVerifyMintAction";
 
 export const useMintNFT = () => {
   const config = useConfig();
 
   const { getMintArguments } = useMintActionArguments();
-  const mintWithSignature = useSafeMintWithSignature(config);
 
+  const mintWithSignature = useSafeMintWithSignature();
   const saveToDatabase = useSaveToDatabase();
+  const verifyMint = useVerifyMintAction();
 
   return useMutation({
     mutationFn: async ({
@@ -33,6 +35,7 @@ export const useMintNFT = () => {
       const args = await getMintArguments(chainId);
 
       const hash = await mintWithSignature.mutateAsync({
+        config,
         args,
         price,
         chainId,
@@ -59,17 +62,20 @@ export const useMintNFT = () => {
       const tokenId = mintedEvent.args._tokenId;
 
       await saveToDatabase.mutateAsync({ tokenId, chainId });
+      await verifyMint.mutateAsync({ txHash: hash, chainId });
     },
   });
 };
 
-const useSafeMintWithSignature = (config: Config) => {
+const useSafeMintWithSignature = () => {
   return useMutation({
     mutationFn: async ({
+      config,
       args,
       price,
       chainId,
     }: {
+      config: Config;
       args: MintArgsWithSignature;
       price: number;
       chainId: number;

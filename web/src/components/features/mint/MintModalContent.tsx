@@ -18,7 +18,7 @@ const messages: Record<NFTStatus, string> = {
   [NFTStatus.Minted]:
     "You can see yout current NFT below. Remember that you can remint it any time!",
   [NFTStatus.Transferred]:
-    "Here is your minted NFT, but you cannot remint anymore as it has been transferred.",
+    "Here is your NFT, but you cannot remint it as it has been transferred.",
 };
 
 const MintModalContent = () => {

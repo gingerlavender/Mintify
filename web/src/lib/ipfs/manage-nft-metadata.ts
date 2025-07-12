@@ -9,7 +9,7 @@ import { spotifyCache } from "../auth/spotify/cache";
 
 const METADATA_SUFFIX = "Metadata.json" as const;
 
-export const createSpotifyBasedMetadata = async (user: User) => {
+export const generateAndUploadSpotifyBasedMetadata = async (user: User) => {
   const spotifyAccessToken = await spotifyCache.accessToken(user.id);
   const imageUrl = generateSpotifyBasedImage(spotifyAccessToken);
 

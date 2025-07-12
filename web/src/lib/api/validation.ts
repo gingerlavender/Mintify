@@ -1,9 +1,11 @@
 import { getServerSession } from "next-auth";
 import { isAddress } from "viem";
 
+import { User } from "@/generated/prisma";
+
 import { authOptions } from "../auth/auth-options";
 import { prisma } from "../prisma-client";
-import { AuthError, ValidationError } from "../errors";
+import { AuthError, PermissionError, ValidationError } from "../errors";
 
 export const assertValidConnection = async () => {
   const session = await getServerSession(authOptions);
@@ -28,4 +30,10 @@ export const assertValidAddress = (address: string | null | undefined) => {
   }
 
   return address;
+};
+
+export const assertCanRequestMintArgs = (user: User) => {
+  if (user.expectedToMint) {
+    throw new PermissionError("Arguments for mint have been already received");
+  }
 };

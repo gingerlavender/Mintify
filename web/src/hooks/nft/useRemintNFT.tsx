@@ -10,12 +10,15 @@ import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 import { RemintArgsWithSignature } from "@/types/nft/mint";
 
 import { useMintActionArguments } from "./useMintActionArguments";
+import { useVerifyMintAction } from "./useVerifyMintAction";
 
 export const useRemintNFT = () => {
   const config = useConfig();
 
   const { getRemintArguments } = useMintActionArguments();
-  const remintWithSignature = useRemintWithSignature(config);
+
+  const remintWithSignature = useRemintWithSignature();
+  const verifyRemint = useVerifyMintAction();
 
   return useMutation({
     mutationFn: async ({
@@ -28,6 +31,7 @@ export const useRemintNFT = () => {
       const args = await getRemintArguments(chainId);
 
       const hash = await remintWithSignature.mutateAsync({
+        config,
         args,
         price,
         chainId,
@@ -40,17 +44,21 @@ export const useRemintNFT = () => {
       if (receipt.status === "reverted") {
         throw new Error("Transaction was reverted");
       }
+
+      await verifyRemint.mutateAsync({ txHash: hash, chainId });
     },
   });
 };
 
-const useRemintWithSignature = (config: Config) => {
+const useRemintWithSignature = () => {
   return useMutation({
     mutationFn: async ({
+      config,
       args,
       price,
       chainId,
     }: {
+      config: Config;
       args: RemintArgsWithSignature;
       price: number;
       chainId: number;

@@ -5,8 +5,9 @@ import { privateKeyToAccount } from "viem/accounts";
 
 import { prisma } from "@/lib/prisma-client";
 import { publicClients } from "@/lib/viem/public-clients";
-import { createSpotifyBasedMetadata } from "@/lib/ipfs/manage-nft-metadata";
+import { generateAndUploadSpotifyBasedMetadata } from "@/lib/ipfs/manage-nft-metadata";
 import {
+  assertCanRequestMintArgs,
   assertValidAddress,
   assertValidConnection,
 } from "@/lib/api/validation";
@@ -28,7 +29,7 @@ import {
   RemintArgsWithSignature,
 } from "@/types/nft/mint";
 
-const MintRequestSchema = z.object({
+const MintArgumentsRequestSchema = z.object({
   action: z.nativeEnum(MintAction),
   chainId: z.number().refine((id): id is ChainId => id in publicClients, {
     message: "Invalid chain id",
@@ -38,10 +39,11 @@ const MintRequestSchema = z.object({
 export async function POST(req: Request) {
   try {
     const rawBody = await req.json();
-    const { action, chainId } = MintRequestSchema.parse(rawBody);
+    const { action, chainId } = MintArgumentsRequestSchema.parse(rawBody);
 
     const user = await assertValidConnection();
     const walletAddress = assertValidAddress(user.wallet);
+    assertCanRequestMintArgs(user);
 
     const publicClient = publicClients[chainId]!;
 
@@ -72,14 +74,14 @@ export async function POST(req: Request) {
       }
 
       tokenId = nft.tokenId;
-      tokenURI = await createSpotifyBasedMetadata(user);
+      tokenURI = await generateAndUploadSpotifyBasedMetadata(user);
 
       message = encodePacked(
         ["uint256", "string", "uint256", "uint256"],
         [BigInt(tokenId), tokenURI, nonce, BigInt(chainId)]
       );
     } else {
-      tokenURI = await createSpotifyBasedMetadata(user);
+      tokenURI = await generateAndUploadSpotifyBasedMetadata(user);
 
       message = encodePacked(
         ["address", "string", "uint256", "uint256"],
@@ -98,6 +100,15 @@ export async function POST(req: Request) {
     if (v === undefined) {
       throw new Error("Cannot retrieve v from signature");
     }
+
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        expectedToMint: true,
+      },
+    });
 
     return NextResponse.json<MintArgsWithSignature | RemintArgsWithSignature>({
       tokenURI,

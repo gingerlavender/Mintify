@@ -19,7 +19,7 @@ export const useMintActionArguments = () => {
       const result = await apiRequest<
         MintArgsWithSignature | RemintArgsWithSignature
       >(
-        "api/nft/mint-arguments",
+        "api/nft/mint/arguments",
         {
           method: "POST",
           headers: { "content-type": "application/json" },
