@@ -80,13 +80,12 @@ const MintModalContent = () => {
             queryClient.invalidateQueries({
               queryKey: ["mintStatus", chainId],
             });
-            enableClose();
           },
           onError: (error) => console.error(error),
+          onSettled: () => enableClose(),
         }
       );
     }
-    enableClose();
   };
 
   if (isLoading) {
