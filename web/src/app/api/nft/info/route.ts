@@ -14,14 +14,14 @@ import {
   handlePrismaErrors,
   RequestError,
 } from "@/lib/errors";
-//import { apiRequest } from "@/lib/api/requests";
+import { apiRequest } from "@/lib/api/requests";
 import { publicClients } from "@/lib/viem/public-clients";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
 import { ChainId } from "@/types/nft/mint";
 import { NFTInfo, NFTStatus } from "@/types/nft/state";
-//import { NFTMetadata } from "@/types/nft/metadata";
+import { NFTMetadata } from "@/types/nft/metadata";
 
 const NFTInfoRequestSchema = z.object({
   chainId: z.number().refine((id): id is ChainId => id in publicClients, {
@@ -74,20 +74,20 @@ export async function POST(req: Request) {
       });
     }
 
-    // const tokenURI = await publicClient.readContract({
-    //   address: MINTIFY_CONTRACT_ADDRESS,
-    //   abi: mintifyAbi,
-    //   functionName: "tokenURI",
-    //   args: [BigInt(nft.tokenId)],
-    // });
+    const tokenURI = await publicClient.readContract({
+      address: MINTIFY_CONTRACT_ADDRESS,
+      abi: mintifyAbi,
+      functionName: "tokenURI",
+      args: [BigInt(nft.tokenId)],
+    });
 
-    // const result = await apiRequest<NFTMetadata>(tokenURI);
+    const result = await apiRequest<NFTMetadata>(tokenURI);
 
-    // if (!result.success) {
-    //   throw new RequestError("Cannot fetch metadata successfully");
-    // }
+    if (!result.success) {
+      throw new RequestError("Cannot fetch metadata successfully");
+    }
 
-    // const { image } = result.data;
+    const { image } = result.data;
 
     const currentOwner = await publicClient.readContract({
       address: MINTIFY_CONTRACT_ADDRESS,
@@ -99,15 +99,13 @@ export async function POST(req: Request) {
     if (currentOwner != user.wallet) {
       return NextResponse.json<NFTInfo>({
         nftStatus: NFTStatus.Transferred,
-        image:
-          "https://crimson-bitter-horse-871.mypinata.cloud/ipfs/bafkreidw4m5wnaexvyym2la43uncnm5w6ad4jpjt2pfgkaqtcmgivzcgse",
+        image,
       });
     }
 
     return NextResponse.json<NFTInfo>({
       nftStatus: NFTStatus.Minted,
-      image:
-        "https://crimson-bitter-horse-871.mypinata.cloud/ipfs/bafkreidw4m5wnaexvyym2la43uncnm5w6ad4jpjt2pfgkaqtcmgivzcgse",
+      image,
       nextPrice,
     });
   } catch (error) {
