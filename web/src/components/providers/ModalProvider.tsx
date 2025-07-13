@@ -17,6 +17,8 @@ interface ModalState extends ModalOptions {
 export interface ModalContextType {
   openModal: (options: ModalOptions) => void;
   closeModal: () => void;
+  disableClose: () => void;
+  enableClose: () => void;
 }
 
 export const ModalContext = createContext<ModalContextType | null>(null);
@@ -40,8 +42,20 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     []
   );
 
+  const disableClose = useCallback(
+    () => setModal((prev) => ({ ...prev, disableClose: true })),
+    []
+  );
+
+  const enableClose = useCallback(
+    () => setModal((prev) => ({ ...prev, disableClose: false })),
+    []
+  );
+
   return (
-    <ModalContext.Provider value={{ openModal, closeModal }}>
+    <ModalContext.Provider
+      value={{ openModal, closeModal, disableClose, enableClose }}
+    >
       {children}
       <Modal
         isOpen={modal.isOpen}

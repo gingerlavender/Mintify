@@ -10,7 +10,7 @@ interface ErrorModalOptions {
 }
 
 export const useErrorModal = () => {
-  const { openModal, closeModal } = useModal();
+  const { openModal, closeModal, enableClose, disableClose } = useModal();
 
   const openErrorModal = ({
     message,
@@ -30,5 +30,5 @@ export const useErrorModal = () => {
     });
   };
 
-  return { openErrorModal, closeErrorModal: closeModal };
+  return { openModal: openErrorModal, closeModal, enableClose, disableClose };
 };

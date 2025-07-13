@@ -22,7 +22,7 @@ const messages: Record<NFTStatus, string> = {
 };
 
 const MintModalContent = () => {
-  const { closeMintModal } = useMintModal();
+  const { closeModal, disableClose, enableClose } = useMintModal();
 
   const chainId = useChainId();
 
@@ -72,6 +72,7 @@ const MintModalContent = () => {
 
   const handleMint = () => {
     if (price) {
+      disableClose();
       mint(
         { price, chainId },
         {
@@ -84,6 +85,7 @@ const MintModalContent = () => {
         }
       );
     }
+    enableClose();
   };
 
   if (isLoading) {
@@ -102,6 +104,14 @@ const MintModalContent = () => {
       {isFetchError && <p>Fetch error: {fetchError.message}</p>}
       {!isError && nftStatus && <p>{messages[nftStatus]}</p>}
       {price && <p>Your current mint price (without fees): {price} ETH</p>}
+      {canMint && isPending ? (
+        <p>Please, do not reload page! This may take a while...</p>
+      ) : (
+        <p>
+          Please, attend: If you decline transaction, you will be able to try
+          again only after an hour.
+        </p>
+      )}
       <Image
         className="w-[50vw] md:w-[20vw] rounded-2xl"
         src={isError ? "Error.png" : nftPicture}
@@ -111,7 +121,7 @@ const MintModalContent = () => {
         <button
           disabled={isPending}
           className="modal-button"
-          onClick={canMint ? handleMint : closeMintModal}
+          onClick={canMint ? handleMint : closeModal}
         >
           {isPending
             ? "Pending..."
