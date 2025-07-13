@@ -82,6 +82,7 @@ export async function POST(req: Request) {
     });
 
     const result = await apiRequest<NFTMetadata>(tokenURI);
+
     if (!result.success) {
       throw new RequestError("Cannot fetch metadata successfully");
     }

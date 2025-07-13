@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     const { txHash, chainId } = MintVerifyRequestSchema.parse(rawBody);
 
     const user = await assertValidConnection();
-    const walletAddress = await assertValidAddress(user.wallet);
+    const walletAddress = assertValidAddress(user.wallet);
 
     const publicClient = publicClients[chainId]!;
 
@@ -60,6 +60,7 @@ export async function POST(req: Request) {
       receipt.from.toLowerCase() === walletAddress.toLowerCase() &&
       receipt.to?.toLowerCase() === MINTIFY_CONTRACT_ADDRESS.toLowerCase() &&
       (mintedEventLogs.length > 0 || URIUpdatedEventLogs.length > 0);
+
     if (!isValidMintTx) {
       throw new PermissionError("Mint transaction has not passed verification");
     }

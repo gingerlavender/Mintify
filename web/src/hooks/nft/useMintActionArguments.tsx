@@ -27,6 +27,7 @@ export const useMintActionArguments = () => {
         },
         { logErrors: false }
       );
+
       if (!result.success) {
         throw new Error(result.error);
       }
