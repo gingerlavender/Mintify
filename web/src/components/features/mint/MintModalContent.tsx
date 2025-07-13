@@ -21,8 +21,7 @@ const nftStatusMessages: Record<NFTStatus, string> = {
     "Here is your NFT, but you cannot remint it as it has been transferred.",
 };
 
-const mintStepMessages: Record<MintStep, string> = {
-  [MintStep.Idle]: "",
+const mintStepMessages: Record<Exclude<MintStep, MintStep.Idle>, string> = {
   [MintStep.Preparing]: "Generating image and preparing transaction...",
   [MintStep.Confirming]: "Confirming transaction in wallet...",
   [MintStep.Waiting]: "Waiting for blockchain confirmation...",
@@ -118,7 +117,7 @@ const MintModalContent = () => {
       {!isError && nftStatus && <p>{nftStatusMessages[nftStatus]}</p>}
       {price && <p>Your current mint price (without fees): {price} ETH</p>}
       {canMint && isPending ? (
-        <p>Please, do not reload page! This may take a while...</p>
+        <p>Please, do not reload page! Be patient, this may take a while...</p>
       ) : (
         <p>
           Please, attend: If you decline transaction, you will be able to try
@@ -130,19 +129,18 @@ const MintModalContent = () => {
         src={isError ? "Error.png" : nftPicture}
         alt="NFT Preview"
       />
+      {currentStep !== MintStep.Idle && <p>{mintStepMessages[currentStep]}</p>}
       <div className="flex justify-center gap-4">
         <button
           disabled={isPending}
           className="modal-button"
           onClick={canMint ? handleMint : closeModal}
         >
-          {currentStep !== MintStep.Idle
-            ? mintStepMessages[currentStep]
-            : canMint
-              ? nftStatus === NFTStatus.NotMinted
-                ? "Mint"
-                : "Remint"
-              : "Close"}
+          {canMint
+            ? nftStatus === NFTStatus.NotMinted
+              ? "Mint"
+              : "Remint"
+            : "Close"}
         </button>
       </div>
     </>
