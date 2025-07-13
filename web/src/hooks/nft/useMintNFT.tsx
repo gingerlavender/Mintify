@@ -10,7 +10,7 @@ import { Config, useConfig } from "wagmi";
 import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import { apiRequest } from "@/lib/api/requests";
 
-import { MintArgsWithSignature, MintStep } from "@/types/nft/mint";
+import { MintAction, MintArgsWithSignature, MintStep } from "@/types/nft/mint";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
@@ -20,8 +20,7 @@ import { useVerifyMintAction } from "./useVerifyMintAction";
 export const useMintNFT = () => {
   const config = useConfig();
 
-  const { getMintArguments } = useMintActionArguments();
-
+  const getMintActionArguments = useMintActionArguments();
   const mintWithSignature = useSafeMintWithSignature();
   const saveToDatabase = useSaveToDatabase();
   const verifyMint = useVerifyMintAction();
@@ -34,7 +33,10 @@ export const useMintNFT = () => {
       price: number;
       chainId: number;
     }) => {
-      const args = await getMintArguments(chainId);
+      const args = await getMintActionArguments.mutateAsync({
+        action: MintAction.Mint,
+        chainId,
+      });
 
       const hash = await mintWithSignature.mutateAsync({
         config,
@@ -69,7 +71,7 @@ export const useMintNFT = () => {
   });
 
   const currentStep: MintStep = useMemo(() => {
-    if (mintWithSignature.isIdle) return MintStep.Preparing;
+    if (getMintActionArguments.isPending) return MintStep.Preparing;
     if (mintWithSignature.isPending) return MintStep.Confirming;
     if (
       mintWithSignature.isSuccess &&
@@ -82,6 +84,7 @@ export const useMintNFT = () => {
     if (mutation.isSuccess) return MintStep.Complete;
     return MintStep.Idle;
   }, [
+    getMintActionArguments.isPending,
     mintWithSignature.isIdle,
     mintWithSignature.isPending,
     mintWithSignature.isSuccess,
