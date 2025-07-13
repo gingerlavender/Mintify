@@ -5,7 +5,7 @@ import { privateKeyToAccount } from "viem/accounts";
 
 import { prisma } from "@/lib/prisma-client";
 import { publicClients } from "@/lib/viem/public-clients";
-import { generateAndUploadSpotifyBasedMetadata } from "@/lib/nft/metadata/manage-nft-metadata";
+import { generateAndUploadSpotifyBasedMetadata } from "@/lib/nft/metadata/management";
 import {
   claimMintArgsRequest,
   cleanupMintArgsRequest,
