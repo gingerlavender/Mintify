@@ -49,7 +49,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
         title={modal.title ?? ""}
         disableClose={modal.disableClose}
       >
-        {modal?.content}
+        {modal.content}
       </Modal>
     </ModalContext.Provider>
   );
