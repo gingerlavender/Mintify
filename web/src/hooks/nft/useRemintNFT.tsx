@@ -7,10 +7,11 @@ import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
-import { RemintArgsWithSignature } from "@/types/nft/mint";
+import { MintStep, RemintArgsWithSignature } from "@/types/nft/mint";
 
 import { useMintActionArguments } from "./useMintActionArguments";
 import { useVerifyMintAction } from "./useVerifyMintAction";
+import { useMemo } from "react";
 
 export const useRemintNFT = () => {
   const config = useConfig();
@@ -20,7 +21,7 @@ export const useRemintNFT = () => {
   const remintWithSignature = useRemintWithSignature();
   const verifyRemint = useVerifyMintAction();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: async ({
       price,
       chainId,
@@ -48,6 +49,25 @@ export const useRemintNFT = () => {
       await verifyRemint.mutateAsync({ txHash: hash, chainId });
     },
   });
+
+  const currentStep: MintStep = useMemo(() => {
+    if (remintWithSignature.isIdle) return MintStep.Preparing;
+    if (remintWithSignature.isPending) return MintStep.Confirming;
+    if (remintWithSignature.isSuccess && verifyRemint.isIdle)
+      return MintStep.Waiting;
+    if (verifyRemint.isPending) return MintStep.Verifying;
+    if (mutation.isSuccess) return MintStep.Complete;
+    return MintStep.Idle;
+  }, [
+    remintWithSignature.isIdle,
+    remintWithSignature.isPending,
+    remintWithSignature.isSuccess,
+    verifyRemint.isIdle,
+    verifyRemint.isPending,
+    mutation.isSuccess,
+  ]);
+
+  return { ...mutation, currentStep };
 };
 
 const useRemintWithSignature = () => {

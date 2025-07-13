@@ -6,19 +6,29 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiRequest } from "@/lib/api/requests";
 
-import { MintAction } from "@/types/nft/mint";
+import { MintAction, MintStep } from "@/types/nft/mint";
 import { NFTStatus, NFTInfo } from "@/types/nft/state";
 
 import { useMintModal } from "@/hooks/modal/useMintModal";
 import { useMintAction } from "@/hooks/nft/useMintAction";
 
-const messages: Record<NFTStatus, string> = {
+const nftStatusMessages: Record<NFTStatus, string> = {
   [NFTStatus.NotMinted]:
     "This is going to be your first mint! Let's sooner find out what you'll get!",
   [NFTStatus.Minted]:
     "You can see yout current NFT below. Remember that you can remint it any time!",
   [NFTStatus.Transferred]:
     "Here is your NFT, but you cannot remint it as it has been transferred.",
+};
+
+const mintStepMessages: Record<MintStep, string> = {
+  [MintStep.Idle]: "",
+  [MintStep.Preparing]: "Generating image and preparing transaction...",
+  [MintStep.Confirming]: "Confirming transaction in wallet...",
+  [MintStep.Waiting]: "Waiting for blockchain confirmation...",
+  [MintStep.Saving]: "Saving information to database...",
+  [MintStep.Verifying]: "Verifying your mint...",
+  [MintStep.Complete]: "Mint is successful!",
 };
 
 const MintModalContent = () => {
@@ -41,9 +51,11 @@ const MintModalContent = () => {
         method: "POST",
         body: JSON.stringify({ chainId }),
       });
+
       if (!result.success) {
         throw new Error(result.error);
       }
+
       return result.data;
     },
     staleTime: Infinity,
@@ -58,6 +70,7 @@ const MintModalContent = () => {
     isPending,
     isError: isMintError,
     error: mintError,
+    currentStep,
   } = useMintAction(mintAction);
 
   const isError = isFetchError || isMintError;
@@ -102,7 +115,7 @@ const MintModalContent = () => {
         </p>
       )}
       {isFetchError && <p>Fetch error: {fetchError.message}</p>}
-      {!isError && nftStatus && <p>{messages[nftStatus]}</p>}
+      {!isError && nftStatus && <p>{nftStatusMessages[nftStatus]}</p>}
       {price && <p>Your current mint price (without fees): {price} ETH</p>}
       {canMint && isPending ? (
         <p>Please, do not reload page! This may take a while...</p>
@@ -123,8 +136,8 @@ const MintModalContent = () => {
           className="modal-button"
           onClick={canMint ? handleMint : closeModal}
         >
-          {isPending
-            ? "Pending..."
+          {currentStep !== MintStep.Idle
+            ? mintStepMessages[currentStep]
             : canMint
               ? nftStatus === NFTStatus.NotMinted
                 ? "Mint"

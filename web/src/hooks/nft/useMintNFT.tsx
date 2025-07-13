@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { useMutation } from "@tanstack/react-query";
 import { waitForTransactionReceipt, writeContract } from "wagmi/actions";
 import { parseEther, parseEventLogs } from "viem";
@@ -8,7 +10,7 @@ import { Config, useConfig } from "wagmi";
 import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import { apiRequest } from "@/lib/api/requests";
 
-import { MintArgsWithSignature } from "@/types/nft/mint";
+import { MintArgsWithSignature, MintStep } from "@/types/nft/mint";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
@@ -24,7 +26,7 @@ export const useMintNFT = () => {
   const saveToDatabase = useSaveToDatabase();
   const verifyMint = useVerifyMintAction();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: async ({
       price,
       chainId,
@@ -65,6 +67,32 @@ export const useMintNFT = () => {
       await verifyMint.mutateAsync({ txHash: hash, chainId });
     },
   });
+
+  const currentStep: MintStep = useMemo(() => {
+    if (mintWithSignature.isIdle) return MintStep.Preparing;
+    if (mintWithSignature.isPending) return MintStep.Confirming;
+    if (
+      mintWithSignature.isSuccess &&
+      saveToDatabase.isIdle &&
+      verifyMint.isIdle
+    )
+      return MintStep.Waiting;
+    if (saveToDatabase.isPending) return MintStep.Saving;
+    if (verifyMint.isPending) return MintStep.Verifying;
+    if (mutation.isSuccess) return MintStep.Complete;
+    return MintStep.Idle;
+  }, [
+    mintWithSignature.isIdle,
+    mintWithSignature.isPending,
+    mintWithSignature.isSuccess,
+    saveToDatabase.isIdle,
+    saveToDatabase.isPending,
+    verifyMint.isIdle,
+    verifyMint.isPending,
+    mutation.isSuccess,
+  ]);
+
+  return { ...mutation, currentStep };
 };
 
 const useSafeMintWithSignature = () => {

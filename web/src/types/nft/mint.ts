@@ -8,6 +8,16 @@ export enum MintAction {
   Remint = "REMINT",
 }
 
+export enum MintStep {
+  Idle,
+  Preparing,
+  Confirming,
+  Waiting,
+  Saving,
+  Verifying,
+  Complete,
+}
+
 interface Signature {
   v: number;
   r: Hex;
