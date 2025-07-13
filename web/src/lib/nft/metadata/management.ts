@@ -2,7 +2,7 @@ import { NFTMetadata } from "@/types/nft/metadata";
 
 import { User } from "@/generated/prisma";
 
-import { pinata, pinataGateway } from "./ipfs/pinata-client";
+import { pinata, pinataGateway } from "./pinata-client";
 import { generateSpotifyBasedMetadata } from "./generation";
 import { parsePinataError } from "../../errors";
 import { getSpotifyAccessToken } from "@/lib/spotify/tokens";
