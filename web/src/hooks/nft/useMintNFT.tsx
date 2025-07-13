@@ -85,7 +85,6 @@ export const useMintNFT = () => {
     return MintStep.Idle;
   }, [
     getMintActionArguments.isPending,
-    mintWithSignature.isIdle,
     mintWithSignature.isPending,
     mintWithSignature.isSuccess,
     saveToDatabase.isIdle,

@@ -33,16 +33,18 @@ const Modal: React.FC<ModalProps> = ({
           className="text-black font-[Inter] font-[300] relative z-50 text-center"
         >
           <DialogBackdrop className="fixed inset-0 bg-black/30" />
-          <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-            <DialogPanel
-              as={motion.div}
-              initial={{ y: "100%", opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              className="flex flex-col items-center max-w-[90%] md:max-w-lg space-y-4 rounded-2xl backdrop-blur-3xl bg-gray-100 p-10 transition-all duration-75 ease-linear"
-            >
-              <DialogTitle className="font-bold">{title}</DialogTitle>
-              {children}
-            </DialogPanel>
+          <div className="fixed inset-0 w-screen overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <DialogPanel
+                as={motion.div}
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="flex flex-col items-center max-w-[90%] md:max-w-lg space-y-4 rounded-2xl backdrop-blur-3xl bg-gray-100 p-10 transition-all duration-75 ease-linear"
+              >
+                <DialogTitle className="font-bold">{title}</DialogTitle>
+                {children}
+              </DialogPanel>
+            </div>
           </div>
         </Dialog>
       )}
