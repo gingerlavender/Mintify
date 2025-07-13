@@ -13,7 +13,8 @@ const WalletLinker = () => {
   const { data: session, update: updateSession } = useSession();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
-  const { openErrorModal, closeErrorModal } = useErrorModal();
+  const { openModal: openErrorModal, closeModal: closeErrorModal } =
+    useErrorModal();
 
   const mismatchRef = useRef<boolean>(false);
 
