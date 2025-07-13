@@ -8,7 +8,7 @@ import { publicClients } from "@/lib/viem/public-clients";
 import { generateAndUploadSpotifyBasedMetadata } from "@/lib/nft/metadata/management";
 import {
   claimMintArgsRequest,
-  cleanupMintArgsRequest,
+  cancelMintArgsRequest,
 } from "@/lib/nft/mint/arguments-request";
 import {
   assertValidAddress,
@@ -120,7 +120,7 @@ export async function POST(req: Request) {
         }
       );
     } catch (error) {
-      await cleanupMintArgsRequest(user);
+      await cancelMintArgsRequest(user);
       throw error;
     }
   } catch (error) {
