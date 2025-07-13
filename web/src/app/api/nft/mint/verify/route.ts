@@ -2,7 +2,6 @@ import { z } from "zod";
 import { isHash, parseEventLogs } from "viem";
 import { NextResponse } from "next/server";
 
-import { prisma } from "@/lib/prisma-client";
 import {
   assertValidAddress,
   assertValidConnection,
@@ -19,6 +18,7 @@ import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import { ChainId } from "@/types/nft/mint";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
+import { cancelMintArgsRequest } from "@/lib/nft/mint/arguments-request";
 
 const MintVerifyRequestSchema = z.object({
   txHash: z
@@ -65,17 +65,7 @@ export async function POST(req: Request) {
       throw new PermissionError("Mint transaction has not passed verification");
     }
 
-    await prisma.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        expectedToMint: false,
-        associatedTxHashes: {
-          set: [...new Set([...user.associatedTxHashes, txHash])],
-        },
-      },
-    });
+    await cancelMintArgsRequest(user, txHash);
 
     return NextResponse.json({});
   } catch (error) {

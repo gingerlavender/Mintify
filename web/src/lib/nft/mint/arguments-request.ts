@@ -7,6 +7,7 @@ import {
   MILLISECONDS_IN_HOUR,
   MILLISECONDS_IN_MINUTE,
 } from "@/lib/constants/time";
+import { Hash } from "viem";
 
 const MINT_ARGUMENTS_REQUEST_PROHIBITION_INTERVAL = MILLISECONDS_IN_HOUR;
 
@@ -49,7 +50,7 @@ export const claimMintArgsRequest = async (user: User) => {
   }
 };
 
-export const cleanupMintArgsRequest = async (user: User) => {
+export const cancelMintArgsRequest = async (user: User, txHash?: Hash) => {
   await prisma.user.update({
     where: {
       id: user.id,
@@ -57,6 +58,13 @@ export const cleanupMintArgsRequest = async (user: User) => {
     data: {
       mintArgsRequested: false,
       mintArgsRequestedAt: null,
+      ...(txHash
+        ? {
+            associatedTxHashes: {
+              set: [...new Set([...user.associatedTxHashes, txHash])],
+            },
+          }
+        : {}),
     },
   });
 };
