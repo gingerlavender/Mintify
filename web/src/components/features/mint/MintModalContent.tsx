@@ -111,7 +111,7 @@ const MintModalContent = () => {
         <button
           disabled={isPending}
           className="modal-button"
-          onClick={isError ? handleMint : closeMintModal}
+          onClick={canMint ? handleMint : closeMintModal}
         >
           {isPending
             ? "Pending..."
