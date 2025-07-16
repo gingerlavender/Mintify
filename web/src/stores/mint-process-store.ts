@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 import { MintStep } from "@/types/nft/mint";
 
@@ -30,35 +31,40 @@ const initialState: MintProcessState = {
   currentStep: MintStep.Idle,
 };
 
-export const useMintProcessStore = create<MintProcessStore>()((set) => ({
-  ...initialState,
-  setCurrentStep: (step) => set({ currentStep: step }),
-  setPending: () =>
-    set({
-      status: "pending",
-      isIdle: false,
-      isPending: true,
-      isSuccess: false,
-      isError: false,
-      error: null,
+export const useMintProcessStore = create<MintProcessStore>()(
+  persist(
+    (set) => ({
+      ...initialState,
+      setCurrentStep: (step) => set({ currentStep: step }),
+      setPending: () =>
+        set({
+          status: "pending",
+          isIdle: false,
+          isPending: true,
+          isSuccess: false,
+          isError: false,
+          error: null,
+        }),
+      setSuccess: () =>
+        set({
+          status: "success",
+          isIdle: false,
+          isPending: false,
+          isSuccess: true,
+          isError: false,
+          error: null,
+        }),
+      setError: (error) =>
+        set({
+          status: "error",
+          isIdle: false,
+          isPending: false,
+          isSuccess: false,
+          isError: true,
+          error,
+        }),
+      resetMintProcess: () => set(initialState),
     }),
-  setSuccess: () =>
-    set({
-      status: "success",
-      isIdle: false,
-      isPending: false,
-      isSuccess: true,
-      isError: false,
-      error: null,
-    }),
-  setError: (error) =>
-    set({
-      status: "error",
-      isIdle: false,
-      isPending: false,
-      isSuccess: false,
-      isError: true,
-      error,
-    }),
-  resetMintProcess: () => set(initialState),
-}));
+    { name: "mint-process-store" }
+  )
+);
