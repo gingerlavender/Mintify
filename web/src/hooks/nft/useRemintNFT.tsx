@@ -25,6 +25,7 @@ export const useRemintNFT = () => {
   const verifyRemint = useVerifyMintAction();
 
   const mutation = useMutation({
+    mutationKey: ["remint"],
     mutationFn: async ({
       price,
       chainId,

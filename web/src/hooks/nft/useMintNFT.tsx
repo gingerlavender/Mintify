@@ -26,6 +26,7 @@ export const useMintNFT = () => {
   const verifyMint = useVerifyMintAction();
 
   const mutation = useMutation({
+    mutationKey: ["mint"],
     mutationFn: async ({
       price,
       chainId,
