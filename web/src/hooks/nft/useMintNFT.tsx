@@ -1,11 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-
 import { useMutation } from "@tanstack/react-query";
 import { waitForTransactionReceipt, writeContract } from "wagmi/actions";
 import { parseEther, parseEventLogs } from "viem";
-import { Config, useConfig } from "wagmi";
+import { Config, useChainId, useConfig } from "wagmi";
 
 import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import { apiRequest } from "@/lib/api/requests";
@@ -19,6 +18,7 @@ import { useVerifyMintAction } from "./useVerifyMintAction";
 
 export const useMintNFT = () => {
   const config = useConfig();
+  const chainId = useChainId();
 
   const getMintActionArguments = useMintActionArguments();
   const mintWithSignature = useSafeMintWithSignature();
@@ -26,7 +26,7 @@ export const useMintNFT = () => {
   const verifyMint = useVerifyMintAction();
 
   const mutation = useMutation({
-    mutationKey: ["mint"],
+    mutationKey: ["mint", chainId],
     mutationFn: async ({
       price,
       chainId,
@@ -69,6 +69,7 @@ export const useMintNFT = () => {
       await saveToDatabase.mutateAsync({ tokenId, chainId });
       await verifyMint.mutateAsync({ txHash: hash, chainId });
     },
+    onError: (error) => console.error(error),
   });
 
   const currentStep: MintStep = useMemo(() => {

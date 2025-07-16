@@ -18,6 +18,7 @@ import {
 } from "@/lib/api/validation";
 
 import { ChainId } from "@/types/nft/mint";
+import { deleteOutdatedData } from "@/lib/nft/metadata/management";
 
 const NFTSaveRequestSchema = z.object({
   tokenId: z
@@ -58,6 +59,15 @@ export async function POST(req: Request) {
         tokenId: tokenId.toString(),
       },
     });
+
+    const tokenURI = await publicClient.readContract({
+      address: MINTIFY_CONTRACT_ADDRESS,
+      abi: mintifyAbi,
+      functionName: "tokenURI",
+      args: [BigInt(tokenId)],
+    });
+    const actualMetadataCid = tokenURI.substring(tokenURI.lastIndexOf("/") + 1);
+    await deleteOutdatedData(user, { actualMetadataCid });
 
     return NextResponse.json({});
   } catch (error) {

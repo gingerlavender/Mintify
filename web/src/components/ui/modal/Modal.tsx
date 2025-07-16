@@ -42,12 +42,11 @@ const Modal: React.FC<ModalProps> = ({
                 animate={{ y: 0, opacity: 1 }}
                 className="flex flex-col items-center max-w-[90%] md:max-w-lg space-y-4 rounded-2xl backdrop-blur-3xl bg-gray-100 p-10 pt-3.5 transition-all duration-75 ease-linear"
               >
-                <CloseButton
-                  disabled={disableClose}
-                  className="relative left-6 text-right text-sm font-[400] my-0 text-white self-end py-0.5 px-1.5 rounded-md bg-gray-300/80 hover:opacity-60 cursor-pointer transition-all duration-200 shadow-xs"
-                >
-                  X
-                </CloseButton>
+                {!disableClose && (
+                  <CloseButton className="relative left-6 text-right text-sm font-[400] my-0 text-white self-end py-0.5 px-1.5 rounded-md bg-gray-300/80 hover:opacity-60 cursor-pointer transition-all duration-200 shadow-xs">
+                    X
+                  </CloseButton>
+                )}
                 <DialogTitle className="font-bold">{title}</DialogTitle>
                 {children}
               </DialogPanel>

@@ -7,8 +7,6 @@ import { generateSpotifyBasedMetadata } from "./generation";
 import { parsePinataError } from "../../errors";
 import { getSpotifyAccessToken } from "@/lib/spotify/tokens";
 
-type PinataStoredDataType = "metadata" | "picture";
-
 const METADATA_SUFFIX = "Metadata.json" as const;
 const IMAGE_SUFFIX = "Image.png";
 
@@ -19,28 +17,47 @@ export const generateAndUploadSpotifyBasedMetadata = async (user: User) => {
     await generateSpotifyBasedMetadata(spotifyAccessToken);
 
   try {
-    const image = await uploadImageToIPFS(user, imageBuffer);
+    const { imageCid, imageId } = await uploadImageToIPFS(user, imageBuffer);
 
     const metadata: NFTMetadata = {
       name: "Mintify NFT",
       description,
-      image: buildPinataURL(image),
+      image: buildPinataURL(imageCid),
     };
 
     const upload = await pinata.upload.public
       .json(metadata)
       .name(`${user.name}${METADATA_SUFFIX}`)
-      .keyvalues({ userId: user.id, type: "metadata" });
-
-    await deleteOutdatedData(user, {
-      actualCid: upload.cid,
-      type: "metadata",
-    });
+      .keyvalues({ userId: user.id, type: "metadata", imageId });
 
     return upload.cid;
   } catch (error) {
     const e = parsePinataError(error);
     throw e;
+  }
+};
+
+export const deleteOutdatedData = async (
+  user: User,
+  { actualMetadataCid }: { actualMetadataCid: string }
+) => {
+  const metadataFiles = await pinata.files.public
+    .list()
+    .keyvalues({ userId: user.id, type: "metadata" });
+
+  const oldMetadataFiles = metadataFiles.files.filter(
+    (file) => file.cid !== actualMetadataCid
+  );
+  const oldMetadataFilesIds = oldMetadataFiles.map((file) => file.id);
+  const oldImageFilesIds = oldMetadataFiles
+    .map((file) => file.keyvalues.imageId)
+    .filter(Boolean);
+
+  if (oldMetadataFilesIds.length > 0) {
+    await pinata.files.public.delete(oldMetadataFilesIds);
+  }
+  if (oldImageFilesIds.length > 0) {
+    await pinata.files.public.delete(oldImageFilesIds);
   }
 };
 
@@ -57,27 +74,7 @@ const uploadImageToIPFS = async (
     .file(file)
     .keyvalues({ userId: user.id, type: "picture" });
 
-  await deleteOutdatedData(user, {
-    actualCid: upload.cid,
-    type: "picture",
-  });
-
-  return upload.cid;
-};
-
-const deleteOutdatedData = async (
-  user: User,
-  { actualCid, type }: { actualCid: string; type: PinataStoredDataType }
-) => {
-  const files = await pinata.files.public
-    .list()
-    .keyvalues({ userId: user.id, type });
-  const oldFiles = files.files.filter((file) => file.cid !== actualCid);
-  const oldFilesIds = oldFiles.map((file) => file.id);
-
-  if (oldFilesIds.length > 0) {
-    await pinata.files.public.delete(oldFilesIds);
-  }
+  return { imageCid: upload.cid, imageId: upload.id };
 };
 
 const buildPinataURL = (cid: string) => {

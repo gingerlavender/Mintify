@@ -31,7 +31,7 @@ const mintStepMessages: Record<Exclude<MintStep, MintStep.Idle>, string> = {
 };
 
 const MintModalContent = () => {
-  const { closeModal, disableClose, enableClose } = useMintModal();
+  const { closeModal } = useMintModal();
 
   const chainId = useChainId();
 
@@ -84,7 +84,6 @@ const MintModalContent = () => {
 
   const handleMint = () => {
     if (price) {
-      disableClose();
       mint(
         { price, chainId },
         {
@@ -93,8 +92,6 @@ const MintModalContent = () => {
               queryKey: ["mintStatus", chainId],
             });
           },
-          onError: (error) => console.error(error),
-          onSettled: () => enableClose(),
         }
       );
     }
