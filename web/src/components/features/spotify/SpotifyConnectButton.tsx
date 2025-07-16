@@ -1,31 +1,34 @@
 "use client";
 
+import { useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 import ButtonWithAvatar from "@/components/ui/buttons/ButtonWithAvatar";
 
-import { useLoading } from "@/hooks/common/useLoading";
-
 const SpotifyConnectButton = () => {
   const { data: session } = useSession();
-  const { isLoading, startLoading } = useLoading(false);
+
+  const [isSigningIn, setIsSigningIn] = useState<boolean>(false);
+  const [isSigningOut, setIsSigningOut] = useState<boolean>(false);
+
+  const isLoading = isSigningIn || isSigningOut;
 
   const handleSpotifyConnect = () => {
-    startLoading();
+    setIsSigningIn(true);
     signIn("spotify", { callbackUrl: "/" });
   };
 
   const handleSpotifyDisconnect = () => {
-    startLoading();
+    setIsSigningOut(false);
     signOut();
   };
 
   return (
     <ButtonWithAvatar
-      text={isLoading ? "Signing in..." : "Connect"}
+      text={isSigningIn ? "Signing in..." : "Connect"}
       onClick={session ? handleSpotifyDisconnect : handleSpotifyConnect}
       connected={!!session}
-      textOnConnected={isLoading ? "Signing out..." : session?.user.name}
+      textOnConnected={isSigningOut ? "Signing out..." : session?.user.name}
       avatar={isLoading ? null : session?.user.image}
     />
   );

@@ -6,11 +6,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiRequest } from "@/lib/api/requests";
 
-import { MintAction, MintStep } from "@/types/nft/mint";
-import { NFTStatus, NFTInfo } from "@/types/nft/state";
-
 import { useMintModal } from "@/hooks/modal/useMintModal";
 import { useMintAction } from "@/hooks/nft/useMintAction";
+
+import { useMintProcessStore } from "@/stores/mint-process-store";
+
+import { MintAction, MintStep } from "@/types/nft/mint";
+import { NFTStatus, NFTInfo } from "@/types/nft/state";
 
 const nftStatusMessages: Record<NFTStatus, string> = {
   [NFTStatus.NotMinted]:
@@ -64,14 +66,15 @@ const MintModalContent = () => {
   const mintAction: MintAction =
     nftStatus === NFTStatus.NotMinted ? MintAction.Mint : MintAction.Remint;
 
+  const { mutate: mint } = useMintAction(mintAction);
+
   const {
-    mutate: mint,
-    isPending,
+    currentStep,
     isError: isMintError,
     error: mintError,
-    currentStep,
-  } = useMintAction(mintAction);
+  } = useMintProcessStore();
 
+  const isPending = currentStep !== MintStep.Idle;
   const isError = isFetchError || isMintError;
 
   const canMint =
@@ -113,14 +116,15 @@ const MintModalContent = () => {
       {isFetchError && <p>Fetch error: {fetchError.message}</p>}
       {!isError && nftStatus && <p>{nftStatusMessages[nftStatus]}</p>}
       {price && <p>Your current mint price (without fees): {price} ETH</p>}
-      {canMint && isPending ? (
-        <p>Please, do not reload page! Be patient, this may take a while...</p>
-      ) : (
-        <p>
-          Please, attend: If you decline transaction, you will be able to try
-          again only after an hour.
-        </p>
-      )}
+      {canMint &&
+        (isPending ? (
+          <p>Please, be patient! This may take a while...</p>
+        ) : (
+          <p>
+            Please, attend: If you decline transaction, you will be able to try
+            again only after an hour.
+          </p>
+        ))}
       <Image
         className="w-[50vw] md:w-[20vw] rounded-2xl"
         src={isError ? "Error.png" : nftPicture}
