@@ -53,10 +53,6 @@ export const deleteOutdatedData = async (
     .map((file) => file.keyvalues.imageId)
     .filter(Boolean);
 
-  console.log("Actual cid: ", actualMetadataCid);
-  console.log("Old metadata files:", oldMetadataFiles);
-  console.log("Extracted image IDs:", oldImageFilesIds);
-
   if (oldMetadataFilesIds.length > 0) {
     await pinata.files.public.delete(oldMetadataFilesIds);
   }

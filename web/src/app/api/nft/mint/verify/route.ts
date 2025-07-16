@@ -19,6 +19,7 @@ import { ChainId } from "@/types/nft/mint";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 import { cancelMintArgsRequest } from "@/lib/nft/mint/arguments-request";
+import { deleteOutdatedData } from "@/lib/nft/metadata/management";
 
 const MintVerifyRequestSchema = z.object({
   txHash: z
@@ -66,6 +67,11 @@ export async function POST(req: Request) {
     }
 
     await cancelMintArgsRequest(user, txHash);
+
+    const actualMetadataCid =
+      mintedEventLogs[0]?.args._tokenURI ??
+      URIUpdatedEventLogs[0]?.args._newTokenURI;
+    await deleteOutdatedData(user, { actualMetadataCid });
 
     return NextResponse.json({});
   } catch (error) {
