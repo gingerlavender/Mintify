@@ -1,14 +1,10 @@
-"use client";
-
-import { useEffect } from "react";
+import { useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { parseEther } from "viem";
 import { Config, useConfig } from "wagmi";
 import { writeContract, waitForTransactionReceipt } from "wagmi/actions";
 
 import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
-
-import { useMintProcessStore } from "@/stores/mint-process-store";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
@@ -27,9 +23,6 @@ export const useRemintNFT = () => {
   const getMintActionArguments = useMintActionArguments();
   const remintWithSignature = useRemintWithSignature();
   const verifyRemint = useVerifyMintAction();
-
-  const { setCurrentStep, setPending, setSuccess, setError } =
-    useMintProcessStore();
 
   const mutation = useMutation({
     mutationFn: async ({
@@ -61,32 +54,18 @@ export const useRemintNFT = () => {
 
       await verifyRemint.mutateAsync({ txHash: hash, chainId });
     },
-    onSuccess: () => setSuccess(),
-    onError: (error) => {
-      console.error(error);
-      setError(error);
-    },
+    onError: (error) => console.error(error),
   });
 
-  useEffect(() => {
-    const currentStep: MintStep = (() => {
-      if (getMintActionArguments.isPending) return MintStep.Preparing;
-      if (remintWithSignature.isPending) return MintStep.Confirming;
-      if (remintWithSignature.isSuccess && verifyRemint.isIdle)
-        return MintStep.Waiting;
-      if (verifyRemint.isPending) return MintStep.Verifying;
-      if (mutation.isSuccess) return MintStep.Complete;
-      return MintStep.Idle;
-    })();
-
-    if (currentStep !== MintStep.Idle) {
-      setPending();
-    }
-
-    setCurrentStep(currentStep);
+  const currentStep: MintStep = useMemo(() => {
+    if (getMintActionArguments.isPending) return MintStep.Preparing;
+    if (remintWithSignature.isPending) return MintStep.Confirming;
+    if (remintWithSignature.isSuccess && verifyRemint.isIdle)
+      return MintStep.Waiting;
+    if (verifyRemint.isPending) return MintStep.Verifying;
+    if (mutation.isSuccess) return MintStep.Complete;
+    return MintStep.Idle;
   }, [
-    setCurrentStep,
-    setPending,
     getMintActionArguments.isPending,
     remintWithSignature.isPending,
     remintWithSignature.isSuccess,
@@ -95,7 +74,7 @@ export const useRemintNFT = () => {
     mutation.isSuccess,
   ]);
 
-  return mutation;
+  return { ...mutation, currentStep };
 };
 
 const useRemintWithSignature = () => {

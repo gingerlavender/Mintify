@@ -1,18 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { BaseError, useChainId } from "wagmi";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-
-import { apiRequest } from "@/lib/api/requests";
+import { BaseError } from "wagmi";
 
 import { useMintModal } from "@/hooks/modal/useMintModal";
-import { useMintAction } from "@/hooks/nft/useMintAction";
 
-import { useMintProcessStore } from "@/stores/mint-process-store";
-
-import { MintAction, MintStep } from "@/types/nft/mint";
-import { NFTStatus, NFTInfo } from "@/types/nft/state";
+import { MintStep } from "@/types/nft/mint";
+import { NFTStatus } from "@/types/nft/state";
+import { useMintProcess } from "@/hooks/nft/useMintProcess";
 
 const nftStatusMessages: Record<NFTStatus, string> = {
   [NFTStatus.NotMinted]:
@@ -33,91 +28,40 @@ const mintStepMessages: Record<Exclude<MintStep, MintStep.Idle>, string> = {
 };
 
 const MintModalContent = () => {
+  const {
+    nftPicture,
+    nftStatus,
+    price,
+    isFetching,
+    fetchError,
+    canMint,
+    mintError,
+    mintIsPending,
+    currentStep,
+    isError,
+    mint,
+  } = useMintProcess();
+
   const { closeModal } = useMintModal();
 
-  const chainId = useChainId();
-
-  const queryClient = useQueryClient();
-
-  const {
-    data: nftInfo,
-    isLoading,
-    isError: isFetchError,
-    error: fetchError,
-  } = useQuery({
-    queryKey: ["mintStatus", chainId],
-    queryFn: async () => {
-      const result = await apiRequest<NFTInfo>("api/nft/info", {
-        headers: { "content-type": "application/json" },
-        method: "POST",
-        body: JSON.stringify({ chainId }),
-      });
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      return result.data;
-    },
-    staleTime: Infinity,
-  });
-
-  const nftStatus = nftInfo?.nftStatus;
-  const mintAction: MintAction =
-    nftStatus === NFTStatus.NotMinted ? MintAction.Mint : MintAction.Remint;
-
-  const { mutate: mint } = useMintAction(mintAction);
-
-  const {
-    currentStep,
-    isError: isMintError,
-    error: mintError,
-  } = useMintProcessStore();
-
-  const isPending = currentStep !== MintStep.Idle;
-  const isError = isFetchError || isMintError;
-
-  const canMint =
-    !isError && !!nftStatus && nftStatus !== NFTStatus.Transferred;
-  const price = canMint ? nftInfo?.nextPrice : undefined;
-  const nftPicture =
-    !nftInfo || nftStatus === NFTStatus.NotMinted
-      ? "NFTPlaceholder.png"
-      : nftInfo.image;
-
-  const handleMint = () => {
-    if (price) {
-      mint(
-        { price, chainId },
-        {
-          onSuccess: () => {
-            queryClient.invalidateQueries({
-              queryKey: ["mintStatus", chainId],
-            });
-          },
-        }
-      );
-    }
-  };
-
-  if (isLoading) {
+  if (isFetching) {
     return <p>Loading...</p>;
   }
 
   return (
     <>
-      {isMintError && (
+      {mintError && (
         <p>
           {`Mint error: ${
             (mintError as BaseError).shortMessage || mintError.message
           }`}
         </p>
       )}
-      {isFetchError && <p>Fetch error: {fetchError.message}</p>}
+      {fetchError && <p>Fetch error: {fetchError.message}</p>}
       {!isError && nftStatus && <p>{nftStatusMessages[nftStatus]}</p>}
       {price && <p>Your current mint price (without fees): {price} ETH</p>}
       {canMint &&
-        (isPending ? (
+        (mintIsPending ? (
           <p>Please, be patient! This may take a while...</p>
         ) : (
           <p>
@@ -133,9 +77,9 @@ const MintModalContent = () => {
       {currentStep !== MintStep.Idle && <p>{mintStepMessages[currentStep]}</p>}
       <div className="flex justify-center gap-4">
         <button
-          disabled={isPending}
+          disabled={mintIsPending}
           className="modal-button"
-          onClick={canMint ? handleMint : closeModal}
+          onClick={canMint ? mint : closeModal}
         >
           {canMint
             ? nftStatus === NFTStatus.NotMinted

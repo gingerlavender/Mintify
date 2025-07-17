@@ -1,6 +1,4 @@
-"use client";
-
-import { useEffect } from "react";
+import { useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { waitForTransactionReceipt, writeContract } from "wagmi/actions";
 import { parseEther, parseEventLogs } from "viem";
@@ -8,8 +6,6 @@ import { Config, useConfig } from "wagmi";
 
 import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import { apiRequest } from "@/lib/api/requests";
-
-import { useMintProcessStore } from "@/stores/mint-process-store";
 
 import { MintAction, MintArgsWithSignature, MintStep } from "@/types/nft/mint";
 
@@ -25,9 +21,6 @@ export const useMintNFT = () => {
   const mintWithSignature = useSafeMintWithSignature();
   const saveToDatabase = useSaveToDatabase();
   const verifyMint = useVerifyMintAction();
-
-  const { setCurrentStep, setPending, setSuccess, setError } =
-    useMintProcessStore();
 
   const mutation = useMutation({
     mutationFn: async ({
@@ -72,37 +65,23 @@ export const useMintNFT = () => {
       await saveToDatabase.mutateAsync({ tokenId, chainId });
       await verifyMint.mutateAsync({ txHash: hash, chainId });
     },
-    onSuccess: () => setSuccess(),
-    onError: (error) => {
-      console.error(error);
-      setError(error);
-    },
+    onError: (error) => console.error(error),
   });
 
-  useEffect(() => {
-    const currentStep: MintStep = (() => {
-      if (getMintActionArguments.isPending) return MintStep.Preparing;
-      if (mintWithSignature.isPending) return MintStep.Confirming;
-      if (
-        mintWithSignature.isSuccess &&
-        saveToDatabase.isIdle &&
-        verifyMint.isIdle
-      )
-        return MintStep.Waiting;
-      if (saveToDatabase.isPending) return MintStep.Saving;
-      if (verifyMint.isPending) return MintStep.Verifying;
-      if (mutation.isSuccess) return MintStep.Complete;
-      return MintStep.Idle;
-    })();
-
-    if (currentStep !== MintStep.Idle) {
-      setPending();
-    }
-
-    setCurrentStep(currentStep);
+  const currentStep = useMemo(() => {
+    if (getMintActionArguments.isPending) return MintStep.Preparing;
+    if (mintWithSignature.isPending) return MintStep.Confirming;
+    if (
+      mintWithSignature.isSuccess &&
+      saveToDatabase.isIdle &&
+      verifyMint.isIdle
+    )
+      return MintStep.Waiting;
+    if (saveToDatabase.isPending) return MintStep.Saving;
+    if (verifyMint.isPending) return MintStep.Verifying;
+    if (mutation.isSuccess) return MintStep.Complete;
+    return MintStep.Idle;
   }, [
-    setCurrentStep,
-    setPending,
     getMintActionArguments.isPending,
     mintWithSignature.isPending,
     mintWithSignature.isSuccess,
@@ -113,7 +92,7 @@ export const useMintNFT = () => {
     mutation.isSuccess,
   ]);
 
-  return mutation;
+  return { ...mutation, currentStep };
 };
 
 const useSafeMintWithSignature = () => {
