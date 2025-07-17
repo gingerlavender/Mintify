@@ -87,7 +87,7 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
   const price = canMint ? nftInfo?.nextPrice : undefined;
   const nftPicture =
     !nftInfo || nftStatus === NFTStatus.NotMinted
-      ? "NFTPlaceholder.png"
+      ? "/NFTPlaceholder.png"
       : nftInfo.image;
 
   const mint = () => {

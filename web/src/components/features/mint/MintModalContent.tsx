@@ -73,8 +73,10 @@ const MintModalContent = () => {
           </p>
         ))}
       <Image
+        width={1024}
+        height={1024}
         className="w-[50vw] md:w-[20vw] rounded-2xl"
-        src={isError ? "Error.png" : nftPicture}
+        src={isError ? "/Error.png" : nftPicture}
         alt="NFT Preview"
       />
       {currentStep !== MintStep.Idle && <p>{mintStepMessages[currentStep]}</p>}

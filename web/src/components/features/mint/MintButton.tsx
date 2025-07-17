@@ -13,13 +13,11 @@ const MintButton = () => {
   const { openModal } = useMintModal();
 
   return (
-    <>
-      <Button
-        disabled={!session || !isConnected}
-        text="Let's go!"
-        onClick={openModal}
-      />
-    </>
+    <Button
+      disabled={!session || !isConnected}
+      text="Let's go!"
+      onClick={openModal}
+    />
   );
 };
 
