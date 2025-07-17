@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { waitForTransactionReceipt, writeContract } from "wagmi/actions";
+import { writeContract } from "wagmi/actions";
 import { parseEther, parseEventLogs } from "viem";
 import { Config, useConfig } from "wagmi";
 
@@ -13,12 +13,14 @@ import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
 
 import { useMintActionArguments } from "./useMintActionArguments";
 import { useVerifyMintAction } from "./useVerifyMintAction";
+import { useWaitForTransactionReceiptMutation } from "./useWaitForTransactionReceiptMutation";
 
 export const useMintNFT = () => {
   const config = useConfig();
 
   const getMintActionArguments = useMintActionArguments();
   const mintWithSignature = useSafeMintWithSignature();
+  const waitForTransactionReceipt = useWaitForTransactionReceiptMutation();
   const saveToDatabase = useSaveToDatabase();
   const verifyMint = useVerifyMintAction();
 
@@ -42,13 +44,11 @@ export const useMintNFT = () => {
         chainId,
       });
 
-      const receipt = await waitForTransactionReceipt(config, {
+      const receipt = await waitForTransactionReceipt.mutateAsync({
+        config,
         hash,
         chainId,
       });
-      if (receipt.status === "reverted") {
-        throw new Error("Transaction was reverted");
-      }
 
       const logs = parseEventLogs({
         logs: receipt.logs,
@@ -70,12 +70,7 @@ export const useMintNFT = () => {
   const currentStep = useMemo(() => {
     if (getMintActionArguments.isPending) return MintStep.Preparing;
     if (mintWithSignature.isPending) return MintStep.Confirming;
-    if (
-      mintWithSignature.isSuccess &&
-      saveToDatabase.isIdle &&
-      verifyMint.isIdle
-    )
-      return MintStep.Waiting;
+    if (waitForTransactionReceipt.isPending) return MintStep.Waiting;
     if (saveToDatabase.isPending) return MintStep.Saving;
     if (verifyMint.isPending) return MintStep.Verifying;
     if (mutation.isSuccess) return MintStep.Complete;
@@ -83,10 +78,8 @@ export const useMintNFT = () => {
   }, [
     getMintActionArguments.isPending,
     mintWithSignature.isPending,
-    mintWithSignature.isSuccess,
-    saveToDatabase.isIdle,
+    waitForTransactionReceipt.isPending,
     saveToDatabase.isPending,
-    verifyMint.isIdle,
     verifyMint.isPending,
     mutation.isSuccess,
   ]);

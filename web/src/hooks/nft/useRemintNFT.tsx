@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { parseEther } from "viem";
 import { Config, useConfig } from "wagmi";
-import { writeContract, waitForTransactionReceipt } from "wagmi/actions";
+import { writeContract } from "wagmi/actions";
 
 import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 
@@ -16,12 +16,14 @@ import {
 
 import { useMintActionArguments } from "./useMintActionArguments";
 import { useVerifyMintAction } from "./useVerifyMintAction";
+import { useWaitForTransactionReceiptMutation } from "./useWaitForTransactionReceiptMutation";
 
 export const useRemintNFT = () => {
   const config = useConfig();
 
   const getMintActionArguments = useMintActionArguments();
   const remintWithSignature = useRemintWithSignature();
+  const waitForTransactionReceipt = useWaitForTransactionReceiptMutation();
   const verifyRemint = useVerifyMintAction();
 
   const mutation = useMutation({
@@ -44,13 +46,7 @@ export const useRemintNFT = () => {
         chainId,
       });
 
-      const receipt = await waitForTransactionReceipt(config, {
-        hash,
-        chainId,
-      });
-      if (receipt.status === "reverted") {
-        throw new Error("Transaction was reverted");
-      }
+      await waitForTransactionReceipt.mutateAsync({ config, hash, chainId });
 
       await verifyRemint.mutateAsync({ txHash: hash, chainId });
     },
@@ -59,16 +55,14 @@ export const useRemintNFT = () => {
   const currentStep: MintStep = useMemo(() => {
     if (getMintActionArguments.isPending) return MintStep.Preparing;
     if (remintWithSignature.isPending) return MintStep.Confirming;
-    if (remintWithSignature.isSuccess && verifyRemint.isIdle)
-      return MintStep.Waiting;
+    if (waitForTransactionReceipt.isPending) return MintStep.Waiting;
     if (verifyRemint.isPending) return MintStep.Verifying;
     if (mutation.isSuccess) return MintStep.Complete;
     return MintStep.Idle;
   }, [
     getMintActionArguments.isPending,
     remintWithSignature.isPending,
-    remintWithSignature.isSuccess,
-    verifyRemint.isIdle,
+    waitForTransactionReceipt.isPending,
     verifyRemint.isPending,
     mutation.isSuccess,
   ]);
