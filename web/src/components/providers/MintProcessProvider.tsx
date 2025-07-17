@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, ReactNode } from "react";
-import { useChainId } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiRequest } from "@/lib/api/requests";
@@ -10,18 +10,22 @@ import { useMintAction } from "@/hooks/nft/useMintAction";
 
 import { MintAction, MintStep } from "@/types/nft/mint";
 import { NFTStatus, NFTInfo } from "@/types/nft/state";
+import { useSession } from "next-auth/react";
 
 interface MintProcessContextType {
   nftPicture: string;
   nftStatus: NFTStatus | undefined;
   price: number | undefined;
-  isFetching: boolean;
-  fetchError: Error | null;
   canMint: boolean;
-  mintError: Error | null;
-  mintIsPending: boolean;
   currentStep: MintStep;
+  isFetching: boolean;
+  isFetchError: boolean;
+  mintIsPending: boolean;
+  mintIsSuccessful: boolean;
+  isMintError: boolean;
   isError: boolean;
+  fetchError: Error | null;
+  mintError: Error | null;
   mint: () => void;
 }
 
@@ -32,6 +36,9 @@ export const MintProcessContext = createContext<MintProcessContextType | null>(
 const MintProcessProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
 
+  const { data: session } = useSession();
+  const { isConnected, address } = useAccount();
+
   const chainId = useChainId();
 
   const {
@@ -40,7 +47,7 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
     isLoading: isFetching,
     error: fetchError,
   } = useQuery({
-    queryKey: ["mintStatus", chainId],
+    queryKey: ["mintStatus", chainId, address],
     queryFn: async () => {
       const result = await apiRequest<NFTInfo>("api/nft/info", {
         headers: { "content-type": "application/json" },
@@ -55,6 +62,8 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
       return result.data;
     },
     staleTime: Infinity,
+    retry: 3,
+    enabled: !!session && isConnected && !!address,
   });
 
   const nftStatus = nftInfo?.nftStatus;
@@ -62,17 +71,19 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
     nftStatus === NFTStatus.NotMinted ? MintAction.Mint : MintAction.Remint;
 
   const {
-    mutate,
+    mutate: _mint,
+    reset: resetMint,
     isError: isMintError,
     error: mintError,
+    isPending: mintIsPending,
+    isSuccess: mintIsSuccessful,
     currentStep,
   } = useMintAction(mintAction);
 
-  const mintIsPending = currentStep !== MintStep.Idle;
   const isError = isFetchError || isMintError;
 
   const canMint =
-    !isError && !!nftStatus && nftStatus !== NFTStatus.Transferred;
+    !isFetchError && !!nftStatus && nftStatus !== NFTStatus.Transferred;
   const price = canMint ? nftInfo?.nextPrice : undefined;
   const nftPicture =
     !nftInfo || nftStatus === NFTStatus.NotMinted
@@ -81,14 +92,16 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
 
   const mint = () => {
     if (price) {
-      mutate(
+      _mint(
         { price, chainId },
         {
           onSuccess: () => {
+            setTimeout(resetMint, 1000);
             queryClient.invalidateQueries({
               queryKey: ["mintStatus", chainId],
             });
           },
+          onError: (error) => console.error(error),
         }
       );
     }
@@ -100,13 +113,16 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
         nftPicture,
         nftStatus,
         price,
-        isFetching,
-        fetchError,
         canMint,
-        mintError,
-        mintIsPending,
         currentStep,
+        isFetching,
+        isFetchError,
+        mintIsPending,
+        mintIsSuccessful,
+        isMintError,
         isError,
+        fetchError,
+        mintError,
         mint,
       }}
     >

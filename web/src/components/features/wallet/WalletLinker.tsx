@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { useAccount, useDisconnect } from "wagmi";
+import { useAccount } from "wagmi";
 
 import { useErrorModal } from "@/hooks/modal/useErrorModal";
 import { useOnceWhen } from "@/hooks/common/useOnceWhen";
@@ -12,16 +11,7 @@ import { apiRequest } from "@/lib/api/requests";
 const WalletLinker = () => {
   const { data: session, update: updateSession } = useSession();
   const { address, isConnected } = useAccount();
-  const { disconnect } = useDisconnect();
-  const { openModal: openErrorModal, closeModal: closeErrorModal } =
-    useErrorModal();
-
-  const mismatchRef = useRef<boolean>(false);
-
-  const resolveMismatch = useCallback(() => {
-    mismatchRef.current = false;
-    closeErrorModal();
-  }, [closeErrorModal]);
+  const { openModal: openErrorModal } = useErrorModal();
 
   const handleUserConnect = () => {
     (async () => {
@@ -44,40 +34,6 @@ const WalletLinker = () => {
     handleUserConnect,
     !!session && isConnected && !!address && !session.user.wallet
   );
-
-  useEffect(() => {
-    const hasSessionWithStoredWallet = !!session?.user.wallet;
-    const loggedWithWalletProvider = address && isConnected;
-    const walletsNotMatch =
-      session?.user.wallet?.toLowerCase() !== address?.toLowerCase();
-
-    if (hasSessionWithStoredWallet) {
-      if (loggedWithWalletProvider) {
-        if (walletsNotMatch) {
-          if (!mismatchRef.current) {
-            openErrorModal({
-              message:
-                "This address is not linked to your current Spotify account. Please reconnect with correct wallet.",
-              buttonText: "Disconnect",
-              onClick: () => disconnect(),
-            });
-            mismatchRef.current = true;
-          }
-        } else if (mismatchRef.current) {
-          resolveMismatch();
-        }
-      } else if (mismatchRef.current) {
-        resolveMismatch();
-      }
-    }
-  }, [
-    session,
-    address,
-    isConnected,
-    openErrorModal,
-    disconnect,
-    resolveMismatch,
-  ]);
 
   return null;
 };

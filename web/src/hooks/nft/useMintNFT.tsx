@@ -65,7 +65,6 @@ export const useMintNFT = () => {
       await saveToDatabase.mutateAsync({ tokenId, chainId });
       await verifyMint.mutateAsync({ txHash: hash, chainId });
     },
-    onError: (error) => console.error(error),
   });
 
   const currentStep = useMemo(() => {

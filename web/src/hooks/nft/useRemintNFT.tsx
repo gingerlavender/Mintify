@@ -54,7 +54,6 @@ export const useRemintNFT = () => {
 
       await verifyRemint.mutateAsync({ txHash: hash, chainId });
     },
-    onError: (error) => console.error(error),
   });
 
   const currentStep: MintStep = useMemo(() => {

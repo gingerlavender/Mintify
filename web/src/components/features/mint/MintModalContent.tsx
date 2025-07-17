@@ -5,9 +5,10 @@ import { BaseError } from "wagmi";
 
 import { useMintModal } from "@/hooks/modal/useMintModal";
 
+import { useMintProcess } from "@/hooks/nft/useMintProcess";
+
 import { MintStep } from "@/types/nft/mint";
 import { NFTStatus } from "@/types/nft/state";
-import { useMintProcess } from "@/hooks/nft/useMintProcess";
 
 const nftStatusMessages: Record<NFTStatus, string> = {
   [NFTStatus.NotMinted]:
@@ -37,6 +38,8 @@ const MintModalContent = () => {
     canMint,
     mintError,
     mintIsPending,
+    mintIsSuccessful,
+    isMintError,
     currentStep,
     isError,
     mint,
@@ -77,14 +80,16 @@ const MintModalContent = () => {
       {currentStep !== MintStep.Idle && <p>{mintStepMessages[currentStep]}</p>}
       <div className="flex justify-center gap-4">
         <button
-          disabled={mintIsPending}
+          disabled={mintIsPending || mintIsSuccessful}
           className="modal-button"
           onClick={canMint ? mint : closeModal}
         >
           {canMint
-            ? nftStatus === NFTStatus.NotMinted
-              ? "Mint"
-              : "Remint"
+            ? isMintError
+              ? "Retry"
+              : nftStatus === NFTStatus.NotMinted
+                ? "Mint"
+                : "Remint"
             : "Close"}
         </button>
       </div>

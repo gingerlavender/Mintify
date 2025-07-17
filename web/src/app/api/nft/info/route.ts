@@ -63,7 +63,7 @@ export async function POST(req: Request) {
 
     if ((!nft && tokenUriUpdates !== 0n) || (nft && tokenUriUpdates === 0n)) {
       throw new RequestError(
-        "Mismatch between mint status in blockchain and internal database. If you have minted NFT already, you probably selected different chain than on mint"
+        "Mismatch between mint status in blockchain and internal database. Try switching chain or wallet address"
       );
     }
 

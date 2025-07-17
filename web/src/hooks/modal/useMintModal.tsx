@@ -1,7 +1,8 @@
 "use client";
 
-import { useModal } from "./useModal";
 import MintModalContent from "@/components/features/mint/MintModalContent";
+
+import { useModal } from "./useModal";
 
 export const useMintModal = () => {
   const { openModal, closeModal, enableClose, disableClose } = useModal();
