@@ -7,6 +7,8 @@ import { Config, useConfig } from "wagmi";
 import { MINTIFY_CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import { apiRequest } from "@/lib/api/requests";
 
+import { useMintArgsStore } from "@/stores/mint-args-store";
+
 import { MintAction, MintArgsWithSignature, MintStep } from "@/types/nft/mint";
 
 import { mintifyAbi } from "@/generated/wagmi/mintifyAbi";
@@ -24,6 +26,8 @@ export const useMintNFT = () => {
   const saveToDatabase = useSaveToDatabase();
   const verifyMint = useVerifyMintAction();
 
+  const { args: storedArgs, setArgs, resetArgs } = useMintArgsStore();
+
   const mutation = useMutation({
     mutationFn: async ({
       price,
@@ -32,10 +36,15 @@ export const useMintNFT = () => {
       price: number;
       chainId: number;
     }) => {
-      const args = await getMintActionArguments.mutateAsync({
-        action: MintAction.Mint,
-        chainId,
-      });
+      const args =
+        storedArgs ??
+        (await getMintActionArguments.mutateAsync({
+          action: MintAction.Mint,
+          chainId,
+        }));
+      if (!storedArgs) {
+        setArgs(args);
+      }
 
       const hash = await mintWithSignature.mutateAsync({
         config,
@@ -65,6 +74,7 @@ export const useMintNFT = () => {
       await saveToDatabase.mutateAsync({ tokenId, chainId });
       await verifyMint.mutateAsync({ txHash: hash, chainId });
     },
+    onSuccess: () => resetArgs(),
   });
 
   const currentStep = useMemo(() => {
