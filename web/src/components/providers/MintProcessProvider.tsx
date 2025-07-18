@@ -2,7 +2,7 @@
 
 import { createContext, ReactNode } from "react";
 import { useAccount, useChainId } from "wagmi";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { apiRequest } from "@/lib/api/requests";
 
@@ -27,6 +27,8 @@ interface MintProcessContextType {
   fetchError: Error | null;
   mintError: Error | null;
   mint: () => void;
+  resetMint: () => void;
+  refetchNFTInfo: () => void;
 }
 
 export const MintProcessContext = createContext<MintProcessContextType | null>(
@@ -34,8 +36,6 @@ export const MintProcessContext = createContext<MintProcessContextType | null>(
 );
 
 const MintProcessProvider = ({ children }: { children: ReactNode }) => {
-  const queryClient = useQueryClient();
-
   const { data: session } = useSession();
   const { isConnected, address } = useAccount();
 
@@ -46,6 +46,7 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
     isError: isFetchError,
     isLoading: isFetching,
     error: fetchError,
+    refetch: refetchNFTInfo,
   } = useQuery({
     queryKey: ["mintStatus", chainId, address],
     queryFn: async () => {
@@ -96,15 +97,18 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
         { price, chainId },
         {
           onSuccess: () => {
-            setTimeout(resetMint, 1000);
-            queryClient.invalidateQueries({
-              queryKey: ["mintStatus", chainId],
-            });
+            refetchNFTInfo();
+            setTimeout(resetMint, 1500);
           },
           onError: (error) => console.error(error),
         }
       );
     }
+  };
+
+  const resetMintAndRefetchInfo = () => {
+    refetchNFTInfo();
+    resetMint();
   };
 
   return (
@@ -124,6 +128,8 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
         fetchError,
         mintError,
         mint,
+        resetMint,
+        refetchNFTInfo,
       }}
     >
       {children}

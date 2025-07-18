@@ -43,9 +43,16 @@ const MintModalContent = () => {
     currentStep,
     isError,
     mint,
+    resetMint,
+    refetchNFTInfo,
   } = useMintProcess();
 
   const { closeModal } = useMintModal();
+
+  const dismissMintError = () => {
+    refetchNFTInfo();
+    resetMint();
+  };
 
   if (isFetching) {
     return <p>Loading...</p>;
@@ -63,15 +70,7 @@ const MintModalContent = () => {
       {fetchError && <p>Fetch error: {fetchError.message}</p>}
       {!isError && nftStatus && <p>{nftStatusMessages[nftStatus]}</p>}
       {price && <p>Your current mint price (without fees): {price} ETH</p>}
-      {canMint &&
-        (mintIsPending ? (
-          <p>Please, be patient! This may take a while...</p>
-        ) : (
-          <p>
-            Please, attend: If you decline transaction, you will be able to try
-            again only after an hour.
-          </p>
-        ))}
+      {mintIsPending && <p>Please, be patient! This may take a while...</p>}
       <Image
         width={1024}
         height={1024}
@@ -84,11 +83,13 @@ const MintModalContent = () => {
         <button
           disabled={mintIsPending || mintIsSuccessful}
           className="modal-button"
-          onClick={canMint ? mint : closeModal}
+          onClick={
+            canMint ? (isMintError ? dismissMintError : mint) : closeModal
+          }
         >
           {canMint
             ? isMintError
-              ? "Retry"
+              ? "Dismiss"
               : nftStatus === NFTStatus.NotMinted
                 ? "Mint"
                 : "Remint"
