@@ -19,7 +19,7 @@ const SpotifyConnectButton = () => {
   };
 
   const handleSpotifyDisconnect = () => {
-    setIsSigningOut(false);
+    setIsSigningOut(true);
     signOut();
   };
 
