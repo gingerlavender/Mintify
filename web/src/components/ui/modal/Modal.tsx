@@ -38,7 +38,7 @@ const Modal: React.FC<ModalProps> = ({
             <div className="flex min-h-full items-center justify-center p-4">
               <DialogPanel
                 as={motion.div}
-                initial={{ y: "10vh", opacity: 0 }}
+                initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 className="flex flex-col items-center max-w-[90%] md:max-w-lg space-y-4 rounded-2xl backdrop-blur-3xl bg-gray-100 p-10 pt-3.5 transition-all duration-[20ms] ease-in-out"
               >
