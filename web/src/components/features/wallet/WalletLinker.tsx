@@ -2,19 +2,20 @@
 
 import { useSession } from "next-auth/react";
 import { useAccount } from "wagmi";
+import { useMutation } from "@tanstack/react-query";
 
 import { useErrorModal } from "@/hooks/modal/useErrorModal";
-import { useOnceWhen } from "@/hooks/common/useOnceWhen";
 
 import { apiRequest } from "@/lib/api/requests";
+import { useEffect } from "react";
 
 const WalletLinker = () => {
   const { data: session, update: updateSession } = useSession();
   const { address, isConnected } = useAccount();
   const { openModal: openErrorModal } = useErrorModal();
 
-  const handleUserConnect = () => {
-    (async () => {
+  const { mutate: linkWallet } = useMutation({
+    mutationFn: async () => {
       const result = await apiRequest("api/user/wallet/link", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -23,17 +24,18 @@ const WalletLinker = () => {
         }),
       });
       if (!result.success) {
-        openErrorModal({ message: result.error });
-      } else if (session?.user.wallet === null) {
-        await updateSession();
+        throw new Error(result.error);
       }
-    })();
-  };
+      await updateSession();
+    },
+    onError: (error) => openErrorModal({ message: error.message }),
+  });
 
-  useOnceWhen(
-    handleUserConnect,
-    !!session && isConnected && !!address && !session.user.wallet
-  );
+  useEffect(() => {
+    if (!!session && isConnected && !!address && !session.user.wallet) {
+      linkWallet();
+    }
+  }, [session, isConnected, address, linkWallet]);
 
   return null;
 };

@@ -23,9 +23,9 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
           : []),
       ],
       transports: {
-        [optimism.id]: http(`${process.env.NEXT_PUBLIC_ALCHEMY_OPMAINNET_URL}`),
+        [optimism.id]: http(process.env.NEXT_PUBLIC_ALCHEMY_OPMAINNET_URL),
         [optimismSepolia.id]: http(
-          `${process.env.NEXT_PUBLIC_ALCHEMY_OPSEPOLIA_URL}`
+          process.env.NEXT_PUBLIC_ALCHEMY_OPSEPOLIA_URL
         ),
       },
       ssr: true,

@@ -33,7 +33,8 @@ const MintModalContent = () => {
     nftPicture,
     nftStatus,
     price,
-    isFetching,
+    fetchIsPending,
+    fetchIsLoading,
     fetchError,
     canMint,
     mintError,
@@ -54,7 +55,12 @@ const MintModalContent = () => {
     resetMint();
   };
 
-  if (isFetching) {
+  const imageSrc = isError ? "/Error.png" : nftPicture;
+
+  if (fetchIsPending) {
+    return <p>NFT Info fetch is pending...</p>;
+  }
+  if (fetchIsLoading) {
     return <p>Loading...</p>;
   }
 
@@ -71,13 +77,15 @@ const MintModalContent = () => {
       {!isError && nftStatus && <p>{nftStatusMessages[nftStatus]}</p>}
       {price && <p>Your current mint price (without fees): {price} ETH</p>}
       {mintIsPending && <p>Please, be patient! This may take a while...</p>}
-      <Image
-        width={1024}
-        height={1024}
-        className="w-[50vw] md:w-[20vw] rounded-2xl"
-        src={isError ? "/Error.png" : nftPicture}
-        alt="NFT Preview"
-      />
+      {imageSrc && (
+        <Image
+          width={1024}
+          height={1024}
+          className="w-[50vw] md:w-[20vw] rounded-2xl"
+          src={imageSrc}
+          alt="NFT Preview"
+        />
+      )}
       {currentStep !== MintStep.Idle && <p>{mintStepMessages[currentStep]}</p>}
       <div className="flex justify-center gap-4">
         <button

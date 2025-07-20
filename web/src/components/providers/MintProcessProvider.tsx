@@ -13,12 +13,13 @@ import { NFTStatus, NFTInfo } from "@/types/nft/state";
 import { useSession } from "next-auth/react";
 
 interface MintProcessContextType {
-  nftPicture: string;
+  nftPicture: string | undefined;
   nftStatus: NFTStatus | undefined;
   price: number | undefined;
   canMint: boolean;
   currentStep: MintStep;
-  isFetching: boolean;
+  fetchIsPending: boolean;
+  fetchIsLoading: boolean;
   isFetchError: boolean;
   mintIsPending: boolean;
   mintIsSuccessful: boolean;
@@ -43,13 +44,20 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
 
   const {
     data: nftInfo,
+    isPending: fetchIsPending,
     isError: isFetchError,
-    isLoading: isFetching,
+    isLoading: fetchIsLoading,
     error: fetchError,
     refetch: refetchNFTInfo,
   } = useQuery({
     queryKey: ["mintStatus", chainId, address],
     queryFn: async () => {
+      if (session?.user.wallet !== address) {
+        throw new Error(
+          "Wallet address linked to this Spotify account and currently connected wallet address do not match"
+        );
+      }
+
       const result = await apiRequest<NFTInfo>("api/nft/info", {
         headers: { "content-type": "application/json" },
         method: "POST",
@@ -64,7 +72,7 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
     },
     staleTime: Infinity,
     retry: 3,
-    enabled: !!session && isConnected && !!address,
+    enabled: !!session && isConnected && !!address && !!session.user.wallet,
   });
 
   const nftStatus = nftInfo?.nftStatus;
@@ -87,9 +95,7 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
     !isFetchError && !!nftStatus && nftStatus !== NFTStatus.Transferred;
   const price = canMint ? nftInfo?.nextPrice : undefined;
   const nftPicture =
-    !nftInfo || nftStatus === NFTStatus.NotMinted
-      ? "/NFTPlaceholder.png"
-      : nftInfo.image;
+    nftStatus === NFTStatus.NotMinted ? "/NFTPlaceholder.png" : nftInfo?.image;
 
   const mint = () => {
     if (price) {
@@ -106,11 +112,6 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const resetMintAndRefetchInfo = () => {
-    refetchNFTInfo();
-    resetMint();
-  };
-
   return (
     <MintProcessContext.Provider
       value={{
@@ -119,7 +120,8 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
         price,
         canMint,
         currentStep,
-        isFetching,
+        fetchIsPending,
+        fetchIsLoading,
         isFetchError,
         mintIsPending,
         mintIsSuccessful,

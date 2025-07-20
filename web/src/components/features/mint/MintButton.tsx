@@ -14,7 +14,7 @@ const MintButton = () => {
 
   return (
     <Button
-      disabled={!session || !isConnected}
+      disabled={!session || !isConnected || !session.user.wallet}
       text="Let's go!"
       onClick={openModal}
     />
