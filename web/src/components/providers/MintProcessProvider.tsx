@@ -71,7 +71,7 @@ const MintProcessProvider = ({ children }: { children: ReactNode }) => {
       return result.data;
     },
     staleTime: Infinity,
-    retry: 3,
+    retry: 1,
     enabled: !!session && isConnected && !!address && !!session.user.wallet,
   });
 

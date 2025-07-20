@@ -57,11 +57,11 @@ const MintModalContent = () => {
 
   const imageSrc = isError ? "/Error.png" : nftPicture;
 
-  if (fetchIsPending) {
-    return <p>NFT Info fetch is pending...</p>;
-  }
   if (fetchIsLoading) {
     return <p>Loading...</p>;
+  }
+  if (fetchIsPending) {
+    return <p>NFT Info fetch is pending...</p>;
   }
 
   return (
