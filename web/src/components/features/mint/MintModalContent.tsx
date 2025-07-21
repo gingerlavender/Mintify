@@ -81,7 +81,7 @@ const MintModalContent = () => {
         <Image
           width={1024}
           height={1024}
-          className="w-64 h-64 rounded-2xl"
+          className="w-52 h-52 sm:w-64 sm:h-64 rounded-2xl"
           src={imageSrc}
           alt="NFT Preview"
         />
