@@ -19,7 +19,7 @@ model User {
   accounts            Account[]
   sessions            Session[]
   nft                 PersonalNFT?
-  mintArgsRequested   Boolean      @default(false)
+  HasUnverifiedMint   Boolean      @default(false)
   mintArgsRequestedAt DateTime?
   associatedTxHashes  String[]     @default([])
   wallet              String?      @unique

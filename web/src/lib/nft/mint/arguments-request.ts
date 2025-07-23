@@ -16,7 +16,7 @@ export const claimMintArgsRequest = async (user: User) => {
     where: {
       id: user.id,
       OR: [
-        { mintArgsRequested: false },
+        { HasUnverifiedMint: false },
         {
           mintArgsRequestedAt: {
             lt: new Date(
@@ -27,7 +27,7 @@ export const claimMintArgsRequest = async (user: User) => {
       ],
     },
     data: {
-      mintArgsRequested: true,
+      HasUnverifiedMint: true,
       mintArgsRequestedAt: new Date(),
     },
   });
@@ -56,7 +56,7 @@ export const cancelMintArgsRequest = async (user: User, txHash?: Hash) => {
       id: user.id,
     },
     data: {
-      mintArgsRequested: false,
+      HasUnverifiedMint: false,
       mintArgsRequestedAt: null,
       ...(txHash
         ? {

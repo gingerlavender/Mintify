@@ -19,6 +19,6 @@ export const useMintArgsStore = create<MintArgsStore>()(
       setArgs: (args) => set({ args }),
       resetArgs: () => set({ args: null }),
     }),
-    { name: "mint-process-store" }
+    { name: "mint-args-store" }
   )
 );
